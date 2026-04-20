@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛡️ Ministro della Difesa - Control Room</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* ===== STILE RADAR VERDE ===== */
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             background: #0a0f0c;
@@ -15,6 +20,7 @@
             font-family: 'Segoe UI', 'Courier New', monospace;
             padding: 20px;
         }
+
         .app-container {
             display: flex;
             gap: 20px;
@@ -22,6 +28,7 @@
             margin: 0 auto;
             height: calc(100vh - 40px);
         }
+
         /* Pannello sinistro */
         .battalions-panel {
             width: 340px;
@@ -32,8 +39,9 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 15px rgba(0,255,136,0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
         }
+
         .battalions-panel h2 {
             margin-top: 0;
             color: #00ff88;
@@ -42,6 +50,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
         .battalion-card {
             background: #1a2a1a;
             border-radius: 12px;
@@ -51,8 +60,17 @@
             border: 1px solid #2a5a2a;
             transition: all 0.2s;
         }
-        .battalion-card:hover { border-color: #00ff88; background: #1f3a1f; }
-        .battalion-card.selected { border-color: #00ff88; box-shadow: 0 0 12px #00ff8840; }
+
+        .battalion-card:hover {
+            border-color: #00ff88;
+            background: #1f3a1f;
+        }
+
+        .battalion-card.selected {
+            border-color: #00ff88;
+            box-shadow: 0 0 12px #00ff8840;
+        }
+
         .battalion-name {
             font-size: 18px;
             font-weight: bold;
@@ -60,15 +78,30 @@
             display: flex;
             justify-content: space-between;
         }
+
         .battalion-stats {
             display: flex;
             gap: 15px;
             margin-top: 8px;
             font-size: 13px;
         }
-        .stat { display: flex; flex-direction: column; }
-        .stat-label { color: #8aaa8a; font-size: 11px; text-transform: uppercase; }
-        .stat-value { color: #00ff88; font-weight: bold; font-size: 16px; }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            color: #8aaa8a;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
         /* Pannello destro */
         .detail-panel {
@@ -78,8 +111,9 @@
             border-radius: 16px;
             padding: 20px;
             overflow-y: auto;
-            box-shadow: 0 0 15px rgba(0,255,136,0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
         }
+
         .detail-header {
             display: flex;
             align-items: center;
@@ -88,7 +122,12 @@
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
-        .detail-header h2 { margin: 0; color: #00ff88; }
+
+        .detail-header h2 {
+            margin: 0;
+            color: #00ff88;
+        }
+
         .badge {
             background: #00ff8820;
             color: #00ff88;
@@ -97,6 +136,7 @@
             font-size: 12px;
             border: 1px solid #00ff8850;
         }
+
         button {
             background: #1e4a1e;
             border: 1px solid #00ff88;
@@ -107,20 +147,35 @@
             cursor: pointer;
             transition: 0.2s;
         }
+
         button.secondary {
             background: #1a2e1a;
             border-color: #3a6a3a;
         }
-        button:hover { background: #2a6a2a; box-shadow: 0 0 8px #00ff88; }
-        button.secondary:hover { background: #2a4a2a; }
+
+        button:hover {
+            background: #2a6a2a;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        button.secondary:hover {
+            background: #2a4a2a;
+        }
+
         .danger-btn {
             background: none;
             border: 1px solid #ff4747;
             color: #ff8888;
         }
-        .danger-btn:hover { background: #ff4747; color: black; box-shadow: 0 0 8px #ff4747; }
 
-        input, textarea {
+        .danger-btn:hover {
+            background: #ff4747;
+            color: black;
+            box-shadow: 0 0 8px #ff4747;
+        }
+
+        input,
+        textarea {
             background: #1a2a1a;
             border: 1px solid #2a5a2a;
             color: #e0ffe0;
@@ -134,14 +189,27 @@
             border-collapse: collapse;
             margin-top: 15px;
         }
-        .mu-table th, .mu-table td {
+
+        .mu-table th,
+        .mu-table td {
             padding: 10px 8px;
             text-align: left;
             border-bottom: 1px solid #2a4a2a;
         }
-        .mu-table th { color: #00ff88; font-size: 12px; text-transform: uppercase; }
-        .clickable { cursor: pointer; }
-        .clickable:hover { background: #1f3a1f; }
+
+        .mu-table th {
+            color: #00ff88;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .clickable:hover {
+            background: #1f3a1f;
+        }
 
         .members-list {
             max-height: 300px;
@@ -175,136 +243,170 @@
             text-decoration: none;
             border-bottom: 1px dotted #00ff88;
         }
-        a:hover { border-bottom: 1px solid #00ff88; }
 
-        .loading { opacity: 0.6; pointer-events: none; }
+        a:hover {
+            border-bottom: 1px solid #00ff88;
+        }
 
-        .members-list img, .detail-header img {
-    object-fit: cover;
-}
-/* ===== EFFETTI CONSOLE MILITARE ===== */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
 
-/* Sfondo con griglia prospettica (pannelli) */
-.battalions-panel::before,
-.detail-panel::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: inherit;
-}
+        .members-list img,
+        .detail-header img {
+            object-fit: cover;
+        }
 
-/* Linea di scansione orizzontale animata */
-.detail-panel::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, transparent, #00ff88, transparent);
-    opacity: 0.4;
-    box-shadow: 0 0 20px #00ff88;
-    animation: scan 8s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-    border-radius: inherit;
-}
+        /* ===== EFFETTI CONSOLE MILITARE ===== */
 
-@keyframes scan {
-    0% { top: 0; }
-    100% { top: 100%; }
-}
+        /* Sfondo con griglia prospettica (pannelli) */
+        .battalions-panel::before,
+        .detail-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: inherit;
+        }
 
-/* Radar rotante (canvas) */
-#radar-canvas {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 2px solid #00ff8840;
-    box-shadow: 0 0 30px #00ff8820, inset 0 0 20px #00ff8810;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0.7;
-}
+        /* Linea di scansione orizzontale animata */
+        .detail-panel::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            opacity: 0.4;
+            box-shadow: 0 0 20px #00ff88;
+            animation: scan 8s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: inherit;
+        }
 
-/* Effetto glitch sui titoli */
-h1, h2, .section-title {
-    text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88, 2px 2px 0 #000;
-    position: relative;
-    animation: textFlicker 3s infinite;
-}
+        @keyframes scan {
+            0% {
+                top: 0;
+            }
 
-@keyframes textFlicker {
-    0%, 100% { opacity: 1; }
-    95% { opacity: 0.9; }
-    96% { opacity: 0.5; }
-    97% { opacity: 1; }
-}
+            100% {
+                top: 100%;
+            }
+        }
 
-/* Bordi tecnologici con angoli */
-.battalions-panel, .detail-panel {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid #00ff8860 !important;
-    box-shadow: 0 0 20px #00ff8820, inset 0 0 30px #00ff8805 !important;
-}
+        /* Radar rotante (canvas) */
+        #radar-canvas {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 2px solid #00ff8840;
+            box-shadow: 0 0 30px #00ff8820, inset 0 0 20px #00ff8810;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.7;
+        }
 
-/* Angoli tagliati */
-.battalions-panel {
-    clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 15px, 100% 100%, 15px 100%, 0% calc(100% - 15px));
-}
-.detail-panel {
-    clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 15px, 100% 100%, 15px 100%, 0% calc(100% - 15px));
-}
+        /* Effetto glitch sui titoli */
+        h1,
+        h2,
+        .section-title {
+            text-shadow: 0 0 5px #00ff88, 0 0 10px #00ff88, 2px 2px 0 #000;
+            position: relative;
+            animation: textFlicker 3s infinite;
+        }
 
-/* Bottoni con effetto "traccia" */
-button {
-    position: relative;
-    overflow: hidden;
-}
-button::after {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, #00ff8840 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-button:hover::after {
-    opacity: 0.3;
-}
+        @keyframes textFlicker {
 
-/* Linee di separazione decorative */
-.section-title {
-    border-bottom: 2px solid #00ff8840 !important;
-    position: relative;
-}
-.section-title::before {
-    content: "";
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 50px;
-    height: 2px;
-    background: #00ff88;
-    box-shadow: 0 0 8px #00ff88;
-}
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            95% {
+                opacity: 0.9;
+            }
+
+            96% {
+                opacity: 0.5;
+            }
+
+            97% {
+                opacity: 1;
+            }
+        }
+
+        /* Bordi tecnologici con angoli */
+        .battalions-panel,
+        .detail-panel {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #00ff8860 !important;
+            box-shadow: 0 0 20px #00ff8820, inset 0 0 30px #00ff8805 !important;
+        }
+
+        /* Angoli tagliati */
+        .battalions-panel {
+            clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 15px, 100% 100%, 15px 100%, 0% calc(100% - 15px));
+        }
+
+        .detail-panel {
+            clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 15px, 100% 100%, 15px 100%, 0% calc(100% - 15px));
+        }
+
+        /* Bottoni con effetto "traccia" */
+        button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, #00ff8840 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        button:hover::after {
+            opacity: 0.3;
+        }
+
+        /* Linee di separazione decorative */
+        .section-title {
+            border-bottom: 2px solid #00ff8840 !important;
+            position: relative;
+        }
+
+        .section-title::before {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
         /* Pannello bilanciamento (destra) */
         .balance-panel {
             width: 280px;
@@ -315,15 +417,19 @@ button:hover::after {
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 15px rgba(0,255,136,0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
             position: relative;
             clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 15px, 100% 100%, 15px 100%, 0% calc(100% - 15px));
         }
+
         .balance-panel::before {
             content: "";
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
                 linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
             background-size: 40px 40px;
@@ -331,6 +437,7 @@ button:hover::after {
             z-index: 0;
             border-radius: inherit;
         }
+
         .balance-panel h2 {
             margin-top: 0;
             color: #00ff88;
@@ -341,10 +448,12 @@ button:hover::after {
             position: relative;
             z-index: 2;
         }
-        .balance-panel > * {
+
+        .balance-panel>* {
             position: relative;
             z-index: 2;
         }
+
         .battalion-balance-item {
             background: #1a2a1a;
             border-radius: 8px;
@@ -354,10 +463,12 @@ button:hover::after {
             border: 1px solid #2a5a2a;
             transition: all 0.2s;
         }
+
         .battalion-balance-item:hover {
             border-color: #00ff88;
             background: #1f3a1f;
         }
+
         .battalion-balance-name {
             font-weight: bold;
             color: #ffffff;
@@ -365,473 +476,583 @@ button:hover::after {
             justify-content: space-between;
             margin-bottom: 6px;
         }
+
         .battalion-balance-stats {
             display: flex;
             gap: 12px;
             font-size: 12px;
         }
+
         .balance-mu-list {
             margin-top: 8px;
             padding-left: 8px;
             border-left: 2px solid #2a5a2a;
             font-size: 11px;
         }
+
         .balance-mu-item {
             display: flex;
             justify-content: space-between;
             color: #aaccaa;
             padding: 2px 0;
         }
+
         .battalion-card.selected {
-    box-shadow: 0 0 20px #00ff88, inset 0 0 10px #00ff8840 !important;
-    transition: box-shadow 0.3s ease;
+            box-shadow: 0 0 20px #00ff88, inset 0 0 10px #00ff8840 !important;
+            transition: box-shadow 0.3s ease;
+        }
+.mode-btn.active {
+    background: #00ff88 !important;
+    color: #0a0f0c !important;
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 20px #00ff88;
 }
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
-        height: auto;
-        overflow-y: auto;
-    }
+.view-container { display: none; }
+.view-container.active { display: block; }
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                height: auto;
+                overflow-y: auto;
+            }
 
-    .app-container {
-        flex-direction: column;
-        height: auto;
-        gap: 15px;
-    }
+            .app-container {
+                flex-direction: column;
+                height: auto;
+                gap: 15px;
+            }
 
-    /* Tutti i pannelli a larghezza piena */
-    .battalions-panel,
-    .detail-panel,
-    .balance-panel {
-        width: 100% !important;
-        max-width: 100%;
-        margin-bottom: 10px;
-        clip-path: none !important; /* Rimuove angoli tagliati che su mobile possono creare problemi */
-        border-radius: 12px !important;
-    }
+            /* Tutti i pannelli a larghezza piena */
+            .battalions-panel,
+            .detail-panel,
+            .balance-panel {
+                width: 100% !important;
+                max-width: 100%;
+                margin-bottom: 10px;
+                clip-path: none !important;
+                /* Rimuove angoli tagliati che su mobile possono creare problemi */
+                border-radius: 12px !important;
+            }
 
-    /* Pannello bilanciamento spostato sotto */
-    .balance-panel {
-        order: 3;
-    }
+            /* Pannello bilanciamento spostato sotto */
+            .balance-panel {
+                order: 3;
+            }
 
-    /* Nascondi radar su mobile (opzionale, commenta se lo vuoi) */
-#radar-canvas {
-    width: 80px;
-    height: 80px;
-    bottom: 10px;
-    right: 10px;
-}
+            /* Nascondi radar su mobile (opzionale, commenta se lo vuoi) */
+            #radar-canvas {
+                width: 80px;
+                height: 80px;
+                bottom: 10px;
+                right: 10px;
+            }
 
-    /* Sposta indicatore API in alto a sinistra per non sovrapporsi */
-    #api-status {
-        top: 10px;
-        right: 10px;
-        padding: 4px 8px;
-    }
+            /* Sposta indicatore API in alto a sinistra per non sovrapporsi */
+            #api-status {
+                top: 10px;
+                right: 10px;
+                padding: 4px 8px;
+            }
 
-    /* Pulsanti più grandi per tocco */
-    button {
-        padding: 12px 16px;
-        font-size: 14px;
-        min-height: 44px; /* Standard touch target */
-    }
+            /* Pulsanti più grandi per tocco */
+            button {
+                padding: 12px 16px;
+                font-size: 14px;
+                min-height: 44px;
+                /* Standard touch target */
+            }
 
-    .mu-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
+            .mu-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
 
-    .mu-table th,
-    .mu-table td {
-        padding: 12px 6px;
-        font-size: 12px;
-    }
+            .mu-table th,
+            .mu-table td {
+                padding: 12px 6px;
+                font-size: 12px;
+            }
 
-    /* Griglia statistiche battaglione: 2 colonne su mobile */
-    .detail-panel div[style*="display:grid"] {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 15px !important;
-    }
+            /* Griglia statistiche battaglione: 2 colonne su mobile */
+            .detail-panel div[style*="display:grid"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 15px !important;
+            }
 
-    /* Stat value più piccolo */
-    .stat-value {
-        font-size: 18px !important;
-    }
+            /* Stat value più piccolo */
+            .stat-value {
+                font-size: 18px !important;
+            }
 
-    /* Card battaglione */
-    .battalion-card {
-        padding: 12px;
-    }
+            /* Card battaglione */
+            .battalion-card {
+                padding: 12px;
+            }
 
-    .battalion-name {
-        font-size: 16px;
-    }
+            .battalion-name {
+                font-size: 16px;
+            }
 
-    .battalion-stats {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
+            .battalion-stats {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
 
-    /* Membri list */
-    .members-list {
-        max-height: 200px;
-    }
+            /* Membri list */
+            .members-list {
+                max-height: 200px;
+            }
 
-    /* Riduci padding dei pannelli */
-    .battalions-panel,
-    .detail-panel,
-    .balance-panel {
-        padding: 15px;
-    }
+            /* Riduci padding dei pannelli */
+            .battalions-panel,
+            .detail-panel,
+            .balance-panel {
+                padding: 15px;
+            }
 
-    /* Intestazioni */
-    h2 {
-        font-size: 18px;
-    }
+            /* Intestazioni */
+            h2 {
+                font-size: 18px;
+            }
 
-    /* Flex row per capo */
-    .flex-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+            /* Flex row per capo */
+            .flex-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
 
-    /* Pulsanti nel pannello sinistro */
-    #newBattalionBtn,
-    #autoBalanceBtn,
-    #refreshAllBtn {
-        width: 100% !important;
-        margin-bottom: 8px;
-    }
+            /* Pulsanti nel pannello sinistro */
+            #newBattalionBtn,
+            #autoBalanceBtn,
+            #refreshAllBtn {
+                width: 100% !important;
+                margin-bottom: 8px;
+            }
 
-    /* Sezione titoli */
-    .section-title {
-        font-size: 14px;
-    }
+            /* Sezione titoli */
+            .section-title {
+                font-size: 14px;
+            }
 
-    /* Badge */
-    .badge {
-        font-size: 10px;
-        padding: 2px 6px;
-    }
+            /* Badge */
+            .badge {
+                font-size: 10px;
+                padding: 2px 6px;
+            }
 
-    /* Link utente */
-    .members-list a {
-        display: flex !important;
-        width: 100%;
-    }
+            /* Link utente */
+            .members-list a {
+                display: flex !important;
+                width: 100%;
+            }
 
-    /* Pannello bilanciamento items */
-    .battalion-balance-item {
-        padding: 10px;
-    }
+            /* Pannello bilanciamento items */
+            .battalion-balance-item {
+                padding: 10px;
+            }
 
-    .battalion-balance-name {
-        font-size: 14px;
-    }
+            .battalion-balance-name {
+                font-size: 14px;
+            }
 
-    /* Toast più piccolo */
-    #toast-container {
-        bottom: 80px;
-        right: 10px;
-        left: 10px;
-    }
-}
+            /* Toast più piccolo */
+            #toast-container {
+                bottom: 80px;
+                right: 10px;
+                left: 10px;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <div id="progress-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:4px; z-index:9999;">
-    <div id="progress-bar" style="width:0%; height:100%; background:#00ff88; box-shadow:0 0 10px #00ff88; transition:width 0.3s;"></div>
-</div>
+    <div id="progress-overlay"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:4px; z-index:9999;">
+        <div id="progress-bar"
+            style="width:0%; height:100%; background:#00ff88; box-shadow:0 0 10px #00ff88; transition:width 0.3s;">
+        </div>
+    </div>
     <canvas id="radar-canvas" width="120" height="120"></canvas>
-<div class="app-container">
-    <!-- PANNELLO SINISTRO: BATTAGLIONI -->
-    <div class="battalions-panel">
-        <h2>🛡️ Battaglioni</h2>
-        <div style="margin-bottom: 15px;">
-            <button id="newBattalionBtn" style="width:100%; margin-bottom:8px;">➕ Nuovo Battaglione</button>
-            <button id="autoBalanceBtn" style="width:100%; background:#1a3a1a; border-color:#00ff88;">🤖 Auto-Bilancia MU</button>
+
+    <!-- Selettore Modalità -->
+    <div class="mode-selector" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
+        <div id="modeBattalionsBtn" class="mode-btn active" style="background: #1a2e1a; border: 2px solid #2a4a2a; color: #aaa; padding: 12px 30px; font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border-radius: 40px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 10px rgba(0,255,136,0.1);">
+            <i class="fas fa-shield-alt"></i> Battaglioni
         </div>
-        <div id="battalionListContainer" style="flex:1;">
-            <!-- Qui vengono iniettati i battaglioni -->
-        </div>
-        <div style="margin-top: 15px; font-size:12px; color:#6a8a6a;">
-            <button id="refreshAllBtn" class="secondary" style="width:100%">🔄 Aggiorna tutti i dati</button>
+        <div id="modeCsvAnalysisBtn" class="mode-btn" style="background: #1a2e1a; border: 2px solid #2a4a2a; color: #aaa; padding: 12px 30px; font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; border-radius: 40px; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 10px rgba(0,255,136,0.1);">
+            <i class="fas fa-file-csv"></i> Analisi CSV
         </div>
     </div>
-
-    <!-- PANNELLO CENTRALE: DETTAGLIO BATTAGLIONE / MU -->
-    <div class="detail-panel" id="detailPanel">
-        <!-- Vuoto all'inizio, popolato dinamicamente -->
-        <div style="text-align:center; color:#6a8a6a; padding:50px;">
-            Seleziona un battaglione o creane uno nuovo
+<!-- VISTA BATTAGLIONI -->
+<div id="battalionsView" class="view-container active">
+    <div class="app-container">
+        <!-- PANNELLO SINISTRO: BATTAGLIONI -->
+        <div class="battalions-panel">
+            <h2>🛡️ Battaglioni</h2>
+            <div style="margin-bottom: 15px;">
+                <button id="newBattalionBtn" style="width:100%; margin-bottom:8px;">➕ Nuovo Battaglione</button>
+                <button id="autoBalanceBtn" style="width:100%; background:#1a3a1a; border-color:#00ff88;">🤖
+                    Auto-Bilancia MU</button>
+            </div>
+            <div id="battalionListContainer" style="flex:1;">
+                <!-- Qui vengono iniettati i battaglioni -->
+            </div>
+            <div style="margin-top: 15px; font-size:12px; color:#6a8a6a;">
+                <button id="refreshAllBtn" class="secondary" style="width:100%">🔄 Aggiorna tutti i dati</button>
+            </div>
         </div>
-    </div>
 
-    <!-- PANNELLO DESTRO: BILANCIAMENTO BATTAGLIONI -->
-    <div class="balance-panel">
-        <h2>⚖️ Bilanciamento</h2>
-        <div id="balanceListContainer" style="flex:1; overflow-y:auto;">
-            <!-- Qui verranno iniettati i battaglioni ordinati per livello -->
+        <!-- PANNELLO CENTRALE: DETTAGLIO BATTAGLIONE / MU -->
+        <div class="detail-panel" id="detailPanel">
+            <!-- Vuoto all'inizio, popolato dinamicamente -->
+            <div style="text-align:center; color:#6a8a6a; padding:50px;">
+                Seleziona un battaglione o creane uno nuovo
+            </div>
         </div>
-        <div style="margin-top:15px; font-size:11px; color:#6a8a6a; text-align:center;">
-            Livello totale crescente
+
+        <!-- PANNELLO DESTRO: BILANCIAMENTO BATTAGLIONI -->
+        <div class="balance-panel">
+            <h2>⚖️ Bilanciamento</h2>
+            <div id="balanceListContainer" style="flex:1; overflow-y:auto;">
+                <!-- Qui verranno iniettati i battaglioni ordinati per livello -->
+            </div>
+            <div style="margin-top:15px; font-size:11px; color:#6a8a6a; text-align:center;">
+                Livello totale crescente
+            </div>
         </div>
     </div>
 </div>
+<!-- FINE VISTA BATTAGLIONI -->
+ <!-- VISTA ANALISI CSV -->
+<div id="csvAnalysisView" class="view-container">
+    <div style="max-width:1400px; margin:0 auto;">
+        <div class="detail-panel" style="max-height: calc(100vh - 140px); overflow-y:auto;">
+            <h2><i class="fas fa-file-csv"></i> Analisi MU da CSV Online</h2>
+            <div class="csv-url-input" style="display: flex; gap: 10px; margin-bottom: 20px;">
+<input type="text" id="csvUrlInput" placeholder="Incolla l'URL del file CSV (es. raw.githubusercontent.com/...)" value="https://raw.githubusercontent.com/francescoparadiso/WarEraMoDDashboard/refs/heads/main/Mu.csv" style="flex:1; background:#1a2a1a; border:1px solid #2a5a2a; color:#e0ffe0; padding:12px; border-radius:8px;">
+                <button id="loadCsvUrlBtn"><i class="fas fa-cloud-download-alt"></i> Carica</button>
+                <button id="clearCsvBtn" class="danger-btn"><i class="fas fa-trash"></i> Pulisci</button>
+            </div>
+            <p style="font-size:12px; color:#8aaa8a;">Il CSV deve contenere una colonna di ID MU (prima colonna o intestata "muId"/"id").</p>
+            <div class="csv-stats-grid" id="csvStatsSummary" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px;"></div>
+            <div style="display:flex; gap:20px; margin-bottom:30px;">
+                <div style="flex:1; height:300px;"><canvas id="csvDamageChart"></canvas></div>
+                <div style="flex:1; height:300px;"><canvas id="csvLevelChart"></canvas></div>
+            </div>
+            <table id="csvAnalysisTable">
+                <thead><tr><th>Nome MU</th><th>Membri</th><th>Livello Tot.</th><th>Danno Sett.</th><th>Danno Tot.</th><th>Bounty</th><th>Terreno</th><th>Azioni</th></tr></thead>
+                <tbody id="csvAnalysisBody"><tr><td colspan="8" style="text-align:center;">Inserisci un URL e clicca Carica</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- FINE VISTA ANALISI CSV -->
+    <script>
+        (function () {
+            // ---------- CONFIGURAZIONE ----------
+            const API_BASE = 'https://gateway.warerastats.io/trpc';
+            const APP_BASE = 'https://app.warera.io';
+            // Token per il gateway (hardcodato, senza prompt)
+            const API_KEY = 'wae_dbcb53cf07868adc4289109e4d4152b938c17a538f39a082c09c15d8774a945b';
 
-<script>
-    (function(){
-        // ---------- CONFIGURAZIONE ----------
-        const API_BASE = 'https://api2.warera.io/trpc'; // Conferma URL corretto
-        const APP_BASE = 'https://app.warera.io';
+            // Stato globale
+            let battalions = [];
+            let selectedBattalionId = null;
+            let muDataCache = new Map();        // id MU -> dati completi
+            let userCache = new Map();          // userId -> { name, ... }
+            let userAliasMap = new Map(); // per eventuali alias manuali
+            // Elementi DOM
+            const battalionListDiv = document.getElementById('battalionListContainer');
+            const detailPanel = document.getElementById('detailPanel');
+            const newBtn = document.getElementById('newBattalionBtn');
+            const refreshAllBtn = document.getElementById('refreshAllBtn');
+            // Riferimenti per le viste
+            const battalionsView = document.getElementById('battalionsView');
+            const csvAnalysisView = document.getElementById('csvAnalysisView');
+            const modeBattalionsBtn = document.getElementById('modeBattalionsBtn');
+            const modeCsvAnalysisBtn = document.getElementById('modeCsvAnalysisBtn');
 
-        // Stato globale
-        let battalions = [];
-        let selectedBattalionId = null;
-        let muDataCache = new Map();        // id MU -> dati completi
-        let userCache = new Map();          // userId -> { name, ... }
-        let userAliasMap = new Map(); // per eventuali alias manuali
-        // Elementi DOM
-        const battalionListDiv = document.getElementById('battalionListContainer');
-        const detailPanel = document.getElementById('detailPanel');
-        const newBtn = document.getElementById('newBattalionBtn');
-        const refreshAllBtn = document.getElementById('refreshAllBtn');
+            // Switch modalità
+            modeBattalionsBtn.addEventListener('click', () => {
+                battalionsView.classList.add('active');
+                csvAnalysisView.classList.remove('active');
+                modeBattalionsBtn.classList.add('active');
+                modeCsvAnalysisBtn.classList.remove('active');
+                if (battalions.length === 0) init(); // ricarica se necessario
+            });
 
-        // ---------- MODELLO BATTAGLIONE ----------
-        function createBattalion(name, chiefUserId = '') {
-            return {
-                id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                name: name,
-                chiefUserId: chiefUserId,
-                muIds: []
-            };
-        }
-
-        // ---------- PERSISTENZA LOCALSTORAGE ----------
-        function loadBattalions() {
-            const stored = localStorage.getItem('warera_battalions_v2');
-            if (stored) {
-                try { battalions = JSON.parse(stored); } catch(e){ battalions = []; }
-            } else {
-                // Battaglione di esempio
-                const example = createBattalion('1ª Divisione Corazzata');
-                example.chiefUserId = '69696382422cd6752173a622';
-                example.muIds = ['6973b4d3eed64c805d54bd07'];
-                battalions = [example];
-            }
-        }
-
-        function saveBattalions() {
-            localStorage.setItem('warera_battalions_v2', JSON.stringify(battalions));
-        }
-
-        // ---------- API MU ----------
-        async function fetchMuById(muId) {
-            try {
-                const response = await fetchWithRetry(`${API_BASE}/mu.getById`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ muId })
-                });
-                if (!response.ok) throw new Error(`Errore API per MU ${muId}: ${response.status}`);
-                const json = await response.json();
-                const data = json.result?.data || json;
-                
-                if (!data) {
-                    console.warn(`MU ${muId} ha restituito dati nulli`);
-                    return null;
-                }
-                
-                if (!data.members) data.members = [];
-                if (!data.rankings) data.rankings = {};
-                
-                console.log(`✅ MU ${muId} caricata: ${data.name || 'senza nome'}, membri: ${data.members.length}`);
-                return data;
-            } catch (err) {
-                console.error(`❌ Errore fetch MU ${muId}:`, err);
-                throw err;
-            }
-        }
-
-        // ---------- API UTENTE ----------
-        async function fetchUserById(userId) {
-            if (typeof userAliasMap !== 'undefined' && userAliasMap.has(userId)) {
-                return { name: userAliasMap.get(userId), id: userId, avatarUrl: null, level: 0 };
-            }
-            if (userCache.has(userId)) return userCache.get(userId);
-
-            try {
-                const response = await fetchWithRetry(`${API_BASE}/user.getUserLite`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                if (!response.ok) throw new Error(`Errore API utente ${userId}`);
-                const json = await response.json();
-                const data = json.result?.data || json;
-                const name = data.username || data.name || `ID: ${userId.slice(-6)}`;
-                const avatarUrl = data.avatarUrl || null;
-                const level = data.leveling?.level || 0;
-                const user = { name, id: userId, avatarUrl, level };
-                userCache.set(userId, user);
-                return user;
-            } catch (err) {
-                console.warn(`Utente ${userId} non caricato, uso fallback`, err);
-                const fallback = { name: `ID: ${userId.slice(-6)}`, id: userId, avatarUrl: null, level: 0 };
-                userCache.set(userId, fallback);
-                return fallback;
-            }
-        }
-       
-        async function refreshAllMuData() {
-            const allMuIds = new Set();
-            battalions.forEach(b => b.muIds.forEach(id => allMuIds.add(id)));
-            const ids = Array.from(allMuIds);
-            
-            if (ids.length === 0) return;
-            
-            showToast(`🔄 Aggiornamento ${ids.length} MU...`, 'info');
-            
-            const concurrencyLimit = 3;
-            const delayBetweenBatches = 500;
-            
-            for (let i = 0; i < ids.length; i += concurrencyLimit) {
-                const batch = ids.slice(i, i + concurrencyLimit);
-                const batchResults = await Promise.all(batch.map(id => 
-                    fetchMuById(id).catch(err => {
-                        console.warn(`MU ${id} non caricata:`, err);
-                        return null;
-                    })
-                ));
-                
-                batch.forEach((id, idx) => {
-                    const mu = batchResults[idx];
-                    if (mu) {
-                        muDataCache.set(id, mu);
-                    } else {
-                        muDataCache.delete(id);
-                    }
-                });
-                
-                if (i + concurrencyLimit < ids.length) {
-                    await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
-                }
-            }
-            
-            showToast(`✅ MU aggiornate`, 'success');
-        }
-
-        // ---------- PRELOAD NOMI UTENTI ----------
-        async function preloadUserNames(userIds, showProgress = false) {
-            const uniqueIds = [...new Set(userIds)];
-            const toLoad = uniqueIds.filter(id => !userCache.has(id));
-            
-            if (toLoad.length === 0) return;
-            
-            if (showProgress) {
-                showToast(`🔄 Caricamento ${toLoad.length} profili...`, 'info');
-            }
-            
-            const concurrencyLimit = 3;  // ridotto per evitare 429
-            const delayBetweenBatches = 500; // ms
-            
-            for (let i = 0; i < toLoad.length; i += concurrencyLimit) {
-                const batch = toLoad.slice(i, i + concurrencyLimit);
-                await Promise.all(batch.map(id => fetchUserById(id)));
-                
-                if (showProgress) {
-                    const loaded = Math.min(i + concurrencyLimit, toLoad.length);
-                    showToast(`🔄 Profili: ${loaded}/${toLoad.length}`, 'info');
-                }
-                
-                if (i + concurrencyLimit < toLoad.length) {
-                    await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
-                }
-            }
-            
-            if (showProgress) {
-                showToast(`✅ ${toLoad.length} profili caricati`, 'success');
-            }
-        }
-        function showToast(message, type = 'info') {
-            const container = document.createElement('div');
-            container.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#1a2e1a; border-left:4px solid #00ff88; color:#e0ffe0; padding:12px 20px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.5); z-index:10000;';
-            container.textContent = message;
-            document.body.appendChild(container);
-            setTimeout(() => container.remove(), 3000);
-        }
-                async function fetchWithRetry(url, options, maxRetries = 3) {
-            let delay = 1000; // 1 secondo iniziale
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.status === 429) {
-                        console.warn(`429 ricevuto, tentativo ${attempt}/${maxRetries}. Attendo ${delay}ms...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2; // backoff esponenziale
-                        continue;
-                    }
-                    return response;
-                } catch (err) {
-                    if (attempt === maxRetries) throw err;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                }
-            }
-            throw new Error(`Max retries (${maxRetries}) exceeded`);
-        }
-        // ---------- CALCOLI STATISTICHE ----------
-   function getBattalionStats(battalion) {
-    let totalMembers = 0;
-    let totalWeeklyDamage = 0;
-    let totalDamage = 0;
-    let totalBounty = 0;
-    let totalLevel = 0;
-
-    battalion.muIds.forEach(muId => {
-        const mu = muDataCache.get(muId);
-        if (mu) {
-            totalMembers += mu.members?.length || 0;
-            totalWeeklyDamage += mu.rankings?.muWeeklyDamages?.value || 0;
-            totalDamage += mu.rankings?.muDamages?.value || 0;
-            totalBounty += mu.rankings?.muBounty?.value || 0;
-        }
-    });
-
-    // Calcola livelli sommando quelli di tutti i membri del battaglione
-    const allMembers = getAllMembersOfBattalion(battalion);
-    allMembers.forEach(userId => {
-        const user = userCache.get(userId);
-        if (user) totalLevel += user.level || 0;
-    });
-
-    return { totalMembers, totalWeeklyDamage, totalDamage, totalBounty, totalLevel };
-}
-        function getAllMembersOfBattalion(battalion) {
-            const membersSet = new Set();
-            battalion.muIds.forEach(muId => {
-                const mu = muDataCache.get(muId);
-                if (mu && mu.members) {
-                    mu.members.forEach(m => membersSet.add(m));
+            modeCsvAnalysisBtn.addEventListener('click', () => {
+                battalionsView.classList.remove('active');
+                csvAnalysisView.classList.add('active');
+                modeCsvAnalysisBtn.classList.add('active');
+                modeBattalionsBtn.classList.remove('active');
+                // Carica automaticamente i dati dal CSV hardcodato se la tabella è vuota
+                if (csvMuData.length === 0) {
+                    const url = document.getElementById('csvUrlInput').value.trim();
+                    if (url) loadCsvFromUrl(url);
                 }
             });
-            return Array.from(membersSet);
-        }
 
-        // ---------- RENDERING LISTA BATTAGLIONI ----------
-          function renderBattalionList() {
-            if (battalions.length === 0) {
-                battalionListDiv.innerHTML = '<div style="color:#6a8a6a; text-align:center; padding:20px;">Nessun battaglione. Creane uno!</div>';
-                return;
+            // Stato Analisi CSV
+            let csvMuData = [];
+            let csvDamageChart = null;
+            let csvLevelChart = null;
+            // ---------- MODELLO BATTAGLIONE ----------
+            function createBattalion(name, chiefUserId = '') {
+                return {
+                    id: 'b_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    name: name,
+                    chiefUserId: chiefUserId,
+                    muIds: []
+                };
             }
-            battalionListDiv.innerHTML = battalions.map(b => {
-                const stats = getBattalionStats(b);
-                const selectedClass = (selectedBattalionId === b.id) ? 'selected' : '';
-                return `
+
+            // ---------- PERSISTENZA LOCALSTORAGE ----------
+            function loadBattalions() {
+                const stored = localStorage.getItem('warera_battalions_v2');
+                if (stored) {
+                    try { battalions = JSON.parse(stored); } catch (e) { battalions = []; }
+                } else {
+                    // Battaglione di esempio
+                    const example = createBattalion('1ª Divisione Corazzata');
+                    example.chiefUserId = '69696382422cd6752173a622';
+                    example.muIds = ['6973b4d3eed64c805d54bd07'];
+                    battalions = [example];
+                }
+            }
+
+            function saveBattalions() {
+                localStorage.setItem('warera_battalions_v2', JSON.stringify(battalions));
+            }
+
+            // ---------- API MU ----------
+            async function fetchMuById(muId) {
+                try {
+                    const response = await fetchWithRetry(`${API_BASE}/mu.getById`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ muId })
+                    });
+                    if (!response.ok) throw new Error(`Errore API per MU ${muId}: ${response.status}`);
+                    const json = await response.json();
+                    const data = json.result?.data || json;
+
+                    if (!data) {
+                        console.warn(`MU ${muId} ha restituito dati nulli`);
+                        return null;
+                    }
+
+                    if (!data.members) data.members = [];
+                    if (!data.rankings) data.rankings = {};
+
+                    console.log(`✅ MU ${muId} caricata: ${data.name || 'senza nome'}, membri: ${data.members.length}`);
+                    return data;
+                } catch (err) {
+                    console.error(`❌ Errore fetch MU ${muId}:`, err);
+                    throw err;
+                }
+            }
+
+            // ---------- API UTENTE ----------
+            async function fetchUserById(userId) {
+                if (typeof userAliasMap !== 'undefined' && userAliasMap.has(userId)) {
+                    return { name: userAliasMap.get(userId), id: userId, avatarUrl: null, level: 0 };
+                }
+                if (userCache.has(userId)) return userCache.get(userId);
+
+                try {
+                    const response = await fetchWithRetry(`${API_BASE}/user.getUserLite`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId })
+                    });
+                    if (!response.ok) throw new Error(`Errore API utente ${userId}`);
+                    const json = await response.json();
+                    const data = json.result?.data || json;
+                    const name = data.username || data.name || `ID: ${userId.slice(-6)}`;
+                    const avatarUrl = data.avatarUrl || null;
+                    const level = data.leveling?.level || 0;
+                    const user = { name, id: userId, avatarUrl, level };
+                    userCache.set(userId, user);
+                    return user;
+                } catch (err) {
+                    console.warn(`Utente ${userId} non caricato, uso fallback`, err);
+                    const fallback = { name: `ID: ${userId.slice(-6)}`, id: userId, avatarUrl: null, level: 0 };
+                    userCache.set(userId, fallback);
+                    return fallback;
+                }
+            }
+
+            async function refreshAllMuData() {
+                const allMuIds = new Set();
+                battalions.forEach(b => b.muIds.forEach(id => allMuIds.add(id)));
+                const ids = Array.from(allMuIds);
+
+                if (ids.length === 0) return;
+
+                showToast(`🔄 Aggiornamento ${ids.length} MU...`, 'info');
+
+                const concurrencyLimit = 5;   // 5 richieste in parallelo
+                const delayBetweenBatches = 300; // 300ms di pausa
+
+                for (let i = 0; i < ids.length; i += concurrencyLimit) {
+                    const batch = ids.slice(i, i + concurrencyLimit);
+                    const batchResults = await Promise.all(batch.map(id =>
+                        fetchMuById(id).catch(err => {
+                            console.warn(`MU ${id} non caricata:`, err);
+                            return null;
+                        })
+                    ));
+
+                    batch.forEach((id, idx) => {
+                        const mu = batchResults[idx];
+                        if (mu) {
+                            muDataCache.set(id, mu);
+                        } else {
+                            muDataCache.delete(id);
+                        }
+                    });
+
+                    if (i + concurrencyLimit < ids.length) {
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+                    }
+                }
+
+                showToast(`✅ MU aggiornate`, 'success');
+            }
+            async function loadMultipleMus(muIds, showProgress = false) {
+                const results = [];
+                const concurrency = 2;
+                const delay = 1000;
+                for (let i = 0; i < muIds.length; i += concurrency) {
+                    const batch = muIds.slice(i, i + concurrency);
+                    const batchResults = await Promise.all(batch.map(id => fetchMuById(id)));
+                    results.push(...batchResults);
+                    if (showProgress) showToast(`Caricate ${Math.min(i+concurrency, muIds.length)}/${muIds.length} MU`);
+                    if (i + concurrency < muIds.length) await new Promise(r => setTimeout(r, delay));
+                }
+                return results;
+            }
+            // ---------- PRELOAD NOMI UTENTI ----------
+            async function preloadUserNames(userIds, showProgress = false) {
+                const uniqueIds = [...new Set(userIds)];
+                const toLoad = uniqueIds.filter(id => !userCache.has(id));
+
+                if (toLoad.length === 0) return;
+
+                if (showProgress) {
+                    showToast(`🔄 Caricamento ${toLoad.length} profili...`, 'info');
+                }
+
+                const concurrencyLimit = 5;   // 5 richieste in parallelo
+                const delayBetweenBatches = 300; // 300ms di pausa
+
+                for (let i = 0; i < toLoad.length; i += concurrencyLimit) {
+                    const batch = toLoad.slice(i, i + concurrencyLimit);
+                    await Promise.all(batch.map(id => fetchUserById(id)));
+
+                    if (showProgress) {
+                        const loaded = Math.min(i + concurrencyLimit, toLoad.length);
+                        showToast(`🔄 Profili: ${loaded}/${toLoad.length}`, 'info');
+                    }
+
+                    if (i + concurrencyLimit < toLoad.length) {
+                        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+                    }
+                }
+
+                if (showProgress) {
+                    showToast(`✅ ${toLoad.length} profili caricati`, 'success');
+                }
+            }
+            function showToast(message, type = 'info') {
+                const container = document.createElement('div');
+                container.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#1a2e1a; border-left:4px solid #00ff88; color:#e0ffe0; padding:12px 20px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.5); z-index:10000;';
+                container.textContent = message;
+                document.body.appendChild(container);
+                setTimeout(() => container.remove(), 3000);
+            }
+            async function fetchWithRetry(url, options, maxRetries = 3) {
+                // Aggiungi header Authorization se API_KEY è presente
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...(API_KEY && { 'Authorization': `Bearer ${API_KEY}` })
+                };
+
+                const finalOptions = {
+                    ...options,
+                    headers: { ...headers, ...options.headers }
+                };
+
+                let delay = 1000;
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        const response = await fetch(url, finalOptions);
+                        if (response.status === 429) {
+                            await new Promise(r => setTimeout(r, delay));
+                            delay *= 2;
+                            continue;
+                        }
+                        return response;
+                    } catch (err) {
+                        if (attempt === maxRetries) throw err;
+                        await new Promise(r => setTimeout(r, delay));
+                        delay *= 2;
+                    }
+                }
+                throw new Error('Max retries exceeded');
+            }
+            // ---------- CALCOLI STATISTICHE ----------
+            function getBattalionStats(battalion) {
+                let totalMembers = 0;
+                let totalWeeklyDamage = 0;
+                let totalDamage = 0;
+                let totalBounty = 0;
+                let totalLevel = 0;
+
+                battalion.muIds.forEach(muId => {
+                    const mu = muDataCache.get(muId);
+                    if (mu) {
+                        totalMembers += mu.members?.length || 0;
+                        totalWeeklyDamage += mu.rankings?.muWeeklyDamages?.value || 0;
+                        totalDamage += mu.rankings?.muDamages?.value || 0;
+                        totalBounty += mu.rankings?.muBounty?.value || 0;
+                    }
+                });
+
+                // Calcola livelli sommando quelli di tutti i membri del battaglione
+                const allMembers = getAllMembersOfBattalion(battalion);
+                allMembers.forEach(userId => {
+                    const user = userCache.get(userId);
+                    if (user) totalLevel += user.level || 0;
+                });
+
+                return { totalMembers, totalWeeklyDamage, totalDamage, totalBounty, totalLevel };
+            }
+            function getAllMembersOfBattalion(battalion) {
+                const membersSet = new Set();
+                battalion.muIds.forEach(muId => {
+                    const mu = muDataCache.get(muId);
+                    if (mu && mu.members) {
+                        mu.members.forEach(m => membersSet.add(m));
+                    }
+                });
+                return Array.from(membersSet);
+            }
+
+            // ---------- RENDERING LISTA BATTAGLIONI ----------
+            function renderBattalionList() {
+                if (battalions.length === 0) {
+                    battalionListDiv.innerHTML = '<div style="color:#6a8a6a; text-align:center; padding:20px;">Nessun battaglione. Creane uno!</div>';
+                    return;
+                }
+                battalionListDiv.innerHTML = battalions.map(b => {
+                    const stats = getBattalionStats(b);
+                    const selectedClass = (selectedBattalionId === b.id) ? 'selected' : '';
+                    return `
                     <div class="battalion-card ${selectedClass}" data-id="${b.id}">
                         <div class="battalion-name">
                             ${b.name}
@@ -853,55 +1074,55 @@ button:hover::after {
                         </div>
                     </div>
                 `;
-            }).join('');
-            
-            document.querySelectorAll('.battalion-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const id = card.dataset.id;
-                    selectBattalion(id);
+                }).join('');
+
+                document.querySelectorAll('.battalion-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const id = card.dataset.id;
+                        selectBattalion(id);
+                    });
                 });
-            });
-        }
-                function renderBalancePanel() {
-            const container = document.getElementById('balanceListContainer');
-            if (!container) return;
-            
-            if (battalions.length === 0) {
-                container.innerHTML = '<div style="color:#6a8a6a; text-align:center; padding:20px;">Nessun battaglione.</div>';
-                return;
             }
-            
-            const battalionsWithStats = battalions.map(b => {
-                const stats = getBattalionStats(b);
-                const muDetails = b.muIds.map(muId => {
-                    const mu = muDataCache.get(muId);
-                    let muLevel = 0;
-                    if (mu && mu.members) {
-                        mu.members.forEach(userId => {
-                            const user = userCache.get(userId);
-                            if (user) muLevel += user.level || 0;
-                        });
-                    }
+            function renderBalancePanel() {
+                const container = document.getElementById('balanceListContainer');
+                if (!container) return;
+
+                if (battalions.length === 0) {
+                    container.innerHTML = '<div style="color:#6a8a6a; text-align:center; padding:20px;">Nessun battaglione.</div>';
+                    return;
+                }
+
+                const battalionsWithStats = battalions.map(b => {
+                    const stats = getBattalionStats(b);
+                    const muDetails = b.muIds.map(muId => {
+                        const mu = muDataCache.get(muId);
+                        let muLevel = 0;
+                        if (mu && mu.members) {
+                            mu.members.forEach(userId => {
+                                const user = userCache.get(userId);
+                                if (user) muLevel += user.level || 0;
+                            });
+                        }
+                        return {
+                            id: muId,
+                            name: mu ? mu.name : muId.slice(-6),
+                            members: mu ? mu.members?.length || 0 : 0,
+                            level: muLevel
+                        };
+                    });
                     return {
-                        id: muId,
-                        name: mu ? mu.name : muId.slice(-6),
-                        members: mu ? mu.members?.length || 0 : 0,
-                        level: muLevel
+                        ...b,
+                        stats,
+                        muDetails
                     };
                 });
-                return {
-                    ...b,
-                    stats,
-                    muDetails
-                };
-            });
-            
-            battalionsWithStats.sort((a, b) => a.stats.totalLevel - b.stats.totalLevel);
-            
-            let html = '';
-            battalionsWithStats.forEach(b => {
-                const isSelected = (selectedBattalionId === b.id);
-                html += `
+
+                battalionsWithStats.sort((a, b) => a.stats.totalLevel - b.stats.totalLevel);
+
+                let html = '';
+                battalionsWithStats.forEach(b => {
+                    const isSelected = (selectedBattalionId === b.id);
+                    html += `
                     <div class="battalion-balance-item" data-id="${b.id}" style="${isSelected ? 'border-color:#00ff88;' : ''}">
                         <div class="battalion-balance-name">
                             ${b.name}
@@ -921,41 +1142,41 @@ button:hover::after {
                         </div>
                     </div>
                 `;
-            });
-            container.innerHTML = html;
-            
-            container.querySelectorAll('.battalion-balance-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const id = item.dataset.id;
-                    selectBattalion(id);
                 });
-            });
-        }
-        async function selectBattalion(id) {
-            selectedBattalionId = id;
-            renderBattalionList();
-            renderBalancePanel();
-            await renderBattalionDetail(id);
-        }
+                container.innerHTML = html;
 
-        // ---------- RENDERING DETTAGLIO BATTAGLIONE ----------
-        async function renderBattalionDetail(battalionId) {
-            const battalion = battalions.find(b => b.id === battalionId);
-            if (!battalion) {
-                detailPanel.innerHTML = '<div style="text-align:center; color:#6a8a6a;">Battaglione non trovato</div>';
-                return;
+                container.querySelectorAll('.battalion-balance-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const id = item.dataset.id;
+                        selectBattalion(id);
+                    });
+                });
             }
-            
-            // Precarica nomi del capo e di tutti i membri
-            const allMembers = getAllMembersOfBattalion(battalion);
-            const userIdsToLoad = [...allMembers];
-            if (battalion.chiefUserId) userIdsToLoad.push(battalion.chiefUserId);
-            await preloadUserNames(userIdsToLoad);
-            
-            const stats = getBattalionStats(battalion);
-            const chiefUser = battalion.chiefUserId ? await fetchUserById(battalion.chiefUserId) : null;
-            
-            let html = `
+            async function selectBattalion(id) {
+                selectedBattalionId = id;
+                renderBattalionList();
+                renderBalancePanel();
+                await renderBattalionDetail(id);
+            }
+
+            // ---------- RENDERING DETTAGLIO BATTAGLIONE ----------
+            async function renderBattalionDetail(battalionId) {
+                const battalion = battalions.find(b => b.id === battalionId);
+                if (!battalion) {
+                    detailPanel.innerHTML = '<div style="text-align:center; color:#6a8a6a;">Battaglione non trovato</div>';
+                    return;
+                }
+
+                // Precarica nomi del capo e di tutti i membri
+                const allMembers = getAllMembersOfBattalion(battalion);
+                const userIdsToLoad = [...allMembers];
+                if (battalion.chiefUserId) userIdsToLoad.push(battalion.chiefUserId);
+                await preloadUserNames(userIdsToLoad);
+
+                const stats = getBattalionStats(battalion);
+                const chiefUser = battalion.chiefUserId ? await fetchUserById(battalion.chiefUserId) : null;
+
+                let html = `
                 <div class="detail-header">
                     <h2>${battalion.name}</h2>
                     <span class="badge">${battalion.muIds.length} MU</span>
@@ -965,9 +1186,8 @@ button:hover::after {
                 </div>
                 
                 <div class="flex-row">
-                    <div><strong>Capo:</strong> ${
-                        chiefUser 
-? `<a href="${APP_BASE}/user/${battalion.chiefUserId}" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">
+                    <div><strong>Capo:</strong> ${chiefUser
+                        ? `<a href="${APP_BASE}/user/${battalion.chiefUserId}" target="_blank" style="display:inline-flex; align-items:center; gap:6px;">
     ${chiefUser.avatarUrl ? `<img src="${chiefUser.avatarUrl}" style="width:24px;height:24px;border-radius:50%;border:1px solid #00ff88;object-fit:cover;">` : ''}
       ${chiefUser.name} (Liv. ${chiefUser.level || 0})
 </a>`                            : '<span style="color:#6a8a6a;">non assegnato</span>'
@@ -1003,24 +1223,24 @@ button:hover::after {
                     <button id="refreshBattalionMusBtn" class="secondary" style="margin-left:10px;">🔄 Aggiorna MU</button>
                 </div>
             `;
-            
-            // Tabella MU
-            if (battalion.muIds.length > 0) {
-                html += `<table class="mu-table">
+
+                // Tabella MU
+                if (battalion.muIds.length > 0) {
+                    html += `<table class="mu-table">
                                         <thead><tr><th>Nome MU</th><th>Membri</th><th>Livello</th><th>Danno Sett.</th><th>Danno Tot.</th><th>Azioni</th></tr></thead>
                     <tbody>`;
-                for (const muId of battalion.muIds) {
-                    const mu = muDataCache.get(muId);
-                    if (mu) {
-                        // Calcola livello totale della MU
-                        let muLevel = 0;
-                        if (mu.members) {
-                            mu.members.forEach(userId => {
-                                const user = userCache.get(userId);
-                                if (user) muLevel += user.level || 0;
-                            });
-                        }
-                        html += `<tr class="clickable" data-mu-id="${muId}">
+                    for (const muId of battalion.muIds) {
+                        const mu = muDataCache.get(muId);
+                        if (mu) {
+                            // Calcola livello totale della MU
+                            let muLevel = 0;
+                            if (mu.members) {
+                                mu.members.forEach(userId => {
+                                    const user = userCache.get(userId);
+                                    if (user) muLevel += user.level || 0;
+                                });
+                            }
+                            html += `<tr class="clickable" data-mu-id="${muId}">
                             <td><a href="${APP_BASE}/mu/${muId}" target="_blank" onclick="event.stopPropagation()">${mu.name || 'Sconosciuta'}</a></td>
                             <td>${mu.members?.length || 0}</td>
                             <td>${muLevel}</td>
@@ -1031,139 +1251,140 @@ button:hover::after {
                                 <button class="danger-btn remove-mu-btn" data-mu-id="${muId}" style="padding:4px 8px; font-size:12px; margin-left:5px;">✕</button>
                             </td>
                         </tr>`;
-                    } else {
-                        html += `<tr><td colspan="6">Caricamento ${muId}...</td></tr>`;
+                        } else {
+                            html += `<tr><td colspan="6">Caricamento ${muId}...</td></tr>`;
+                        }
                     }
+                    html += `</tbody></table>`;
+                } else {
+                    html += '<p style="color:#6a8a6a;">Nessuna MU assegnata. Aggiungine una tramite ID.</p>';
                 }
-                html += `</tbody></table>`;
-            } else {
-                html += '<p style="color:#6a8a6a;">Nessuna MU assegnata. Aggiungine una tramite ID.</p>';
-            }
-            
-            // Lista membri del battaglione con nomi
-            html += `<div class="section-title">👥 Membri del Battaglione (${allMembers.length})</div>`;
-            if (allMembers.length > 0) {
-                const memberNames = await Promise.all(allMembers.map(id => fetchUserById(id)));
-                html += `<div class="members-list">`;
-memberNames.forEach(user => {
-    const avatarHtml = user.avatarUrl ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">` : '';
-    html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px; display:inline-flex; align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
-});
-                html += `</div>`;
-            } else {
-                html += '<p style="color:#6a8a6a;">Nessun membro.</p>';
-            }
-            
-            detailPanel.innerHTML = html;
-            
-            // Event listeners
-            document.getElementById('editBattalionBtn')?.addEventListener('click', () => editBattalion(battalion));
-            document.getElementById('deleteBattalionBtn')?.addEventListener('click', () => deleteBattalion(battalion.id));
-            document.getElementById('addMuToBattalionBtn')?.addEventListener('click', () => addMuToBattalion(battalion.id));
-            document.getElementById('refreshBattalionMusBtn')?.addEventListener('click', async () => {
-                await refreshAllMuData();
-                await renderBattalionDetail(battalion.id);
-                renderBattalionList();
-            });
-            
-            document.querySelectorAll('tr.clickable').forEach(row => {
-                row.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                    const muId = row.dataset.muId;
-                    showMuDetail(muId, battalion.id);
-                });
-            });
-            
-document.querySelectorAll('.view-mu-members').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const muId = btn.dataset.muId;
-        // Usa showMuDetail per visualizzare la lista membri completa e cliccabile
-        showMuDetail(muId, battalion.id);
-    });
-});
-            
-            document.querySelectorAll('.remove-mu-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const muId = btn.dataset.muId;
-                    removeMuFromBattalion(battalion.id, muId);
-                });
-            });
-        }
 
-        // ---------- GESTIONE BATTAGLIONI ----------
-        function editBattalion(battalion) {
-            const newName = prompt('Nuovo nome del battaglione:', battalion.name);
-            if (newName) battalion.name = newName;
-            const newChief = prompt('ID del Capo (userId):', battalion.chiefUserId);
-            if (newChief !== null) battalion.chiefUserId = newChief;
-            saveBattalions();
-            renderBattalionList();
-            renderBalancePanel();
-            renderBattalionDetail(battalion.id);
-        }
+                // Lista membri del battaglione con nomi
+                html += `<div class="section-title">👥 Membri del Battaglione (${allMembers.length})</div>`;
+                if (allMembers.length > 0) {
+                    const memberNames = await Promise.all(allMembers.map(id => fetchUserById(id)));
+                    html += `<div class="members-list">`;
+                    memberNames.forEach(user => {
+                        const avatarHtml = user.avatarUrl ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">` : '';
+                        html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px; display:inline-flex; align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += '<p style="color:#6a8a6a;">Nessun membro.</p>';
+                }
 
-        function deleteBattalion(id) {
-            if (confirm('Eliminare questo battaglione?')) {
-                battalions = battalions.filter(b => b.id !== id);
-                if (selectedBattalionId === id) selectedBattalionId = null;
+                detailPanel.innerHTML = html;
+
+                // Event listeners
+                document.getElementById('editBattalionBtn')?.addEventListener('click', () => editBattalion(battalion));
+                document.getElementById('deleteBattalionBtn')?.addEventListener('click', () => deleteBattalion(battalion.id));
+                document.getElementById('addMuToBattalionBtn')?.addEventListener('click', () => addMuToBattalion(battalion.id));
+                document.getElementById('refreshBattalionMusBtn')?.addEventListener('click', async () => {
+                    await refreshAllMuData();
+                    await renderBattalionDetail(battalion.id);
+                    renderBattalionList();
+                });
+
+                document.querySelectorAll('tr.clickable').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                        const muId = row.dataset.muId;
+                        showMuDetail(muId, battalion.id);
+                    });
+                });
+
+                document.querySelectorAll('.view-mu-members').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const muId = btn.dataset.muId;
+                        // Usa showMuDetail per visualizzare la lista membri completa e cliccabile
+                        showMuDetail(muId, battalion.id);
+                    });
+                });
+
+                document.querySelectorAll('.remove-mu-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const muId = btn.dataset.muId;
+                        removeMuFromBattalion(battalion.id, muId);
+                    });
+                });
+            }
+
+            // ---------- GESTIONE BATTAGLIONI ----------
+            function editBattalion(battalion) {
+                const newName = prompt('Nuovo nome del battaglione:', battalion.name);
+                if (newName) battalion.name = newName;
+                const newChief = prompt('ID del Capo (userId):', battalion.chiefUserId);
+                if (newChief !== null) battalion.chiefUserId = newChief;
                 saveBattalions();
                 renderBattalionList();
                 renderBalancePanel();
-                if (!selectedBattalionId) detailPanel.innerHTML = '<div style="text-align:center; color:#6a8a6a; padding:50px;">Seleziona un battaglione o creane uno nuovo</div>';
-                else renderBattalionDetail(selectedBattalionId);
+                renderBattalionDetail(battalion.id);
             }
-        }
 
-        async function addMuToBattalion(battalionId) {
-            const muId = prompt('Inserisci l\'ID della MU da aggiungere:');
-            if (!muId) return;
-            const battalion = battalions.find(b => b.id === battalionId);
-            if (battalion.muIds.includes(muId)) {
-                alert('MU già presente nel battaglione.');
-                return;
+            function deleteBattalion(id) {
+                if (confirm('Eliminare questo battaglione?')) {
+                    battalions = battalions.filter(b => b.id !== id);
+                    if (selectedBattalionId === id) selectedBattalionId = null;
+                    saveBattalions();
+                    renderBattalionList();
+                    renderBalancePanel();
+                    if (!selectedBattalionId) detailPanel.innerHTML = '<div style="text-align:center; color:#6a8a6a; padding:50px;">Seleziona un battaglione o creane uno nuovo</div>';
+                    else renderBattalionDetail(selectedBattalionId);
+                }
             }
-            try {
-                const mu = await fetchMuById(muId);
-                muDataCache.set(muId, mu);
-                battalion.muIds.push(muId);
+
+            async function addMuToBattalion(battalionId) {
+                const muId = prompt('Inserisci l\'ID della MU da aggiungere:');
+                if (!muId) return;
+                const battalion = battalions.find(b => b.id === battalionId);
+                if (battalion.muIds.includes(muId)) {
+                    alert('MU già presente nel battaglione.');
+                    return;
+                }
+                try {
+                    const mu = await fetchMuById(muId);
+                    muDataCache.set(muId, mu);
+                    battalion.muIds.push(muId);
+                    saveBattalions();
+                    renderBattalionList();
+                    renderBalancePanel();
+                    await renderBattalionDetail(battalionId);
+                } catch (err) {
+                    alert('ID MU non valido o errore di rete.');
+                }
+            }
+
+            function removeMuFromBattalion(battalionId, muId) {
+                const battalion = battalions.find(b => b.id === battalionId);
+                battalion.muIds = battalion.muIds.filter(id => id !== muId);
                 saveBattalions();
                 renderBattalionList();
                 renderBalancePanel();
-                await renderBattalionDetail(battalionId);
-            } catch (err) {
-                alert('ID MU non valido o errore di rete.');
+                renderBattalionDetail(battalionId);
             }
-        }
 
-        function removeMuFromBattalion(battalionId, muId) {
-            const battalion = battalions.find(b => b.id === battalionId);
-            battalion.muIds = battalion.muIds.filter(id => id !== muId);
-            saveBattalions();
-            renderBattalionList();
-            renderBalancePanel();
-            renderBattalionDetail(battalionId);
-        }
+            // ---------- DETTAGLIO SINGOLA MU ----------
+            // ---------- DETTAGLIO SINGOLA MU ----------
+            async function showMuDetail(muId, battalionId) {
+                const mu = muDataCache.get(muId);
+                if (!mu) return;
 
-        // ---------- DETTAGLIO SINGOLA MU ----------
-         async function showMuDetail(muId, battalionId) {
-            const mu = muDataCache.get(muId);
-            if (!mu) return;
-            
-            await preloadUserNames(mu.members || []);
-            
-            let totalMuLevel = 0;
-            if (mu.members) {
-                mu.members.forEach(userId => {
-                    const user = userCache.get(userId);
-                    if (user) totalMuLevel += user.level || 0;
-                });
-            }
-            
-            let html = `
+                await preloadUserNames(mu.members || []);
+
+                let totalMuLevel = 0;
+                if (mu.members) {
+                    mu.members.forEach(userId => {
+                        const user = userCache.get(userId);
+                        if (user) totalMuLevel += user.level || 0;
+                    });
+                }
+
+                let html = `
                 <div style="margin-bottom:20px;">
-                    <button id="backToBattalionBtn" class="secondary">← Torna al Battaglione</button>
+                    <button id="backToBattalionBtn" class="secondary">← Torna</button>
                 </div>
                 <h2><a href="${APP_BASE}/mu/${muId}" target="_blank">${mu.name}</a> <span class="badge">${mu._id}</span></h2>
                 <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:20px; margin:20px 0;">
@@ -1175,240 +1396,400 @@ document.querySelectorAll('.view-mu-members').forEach(btn => {
                     <div class="stat"><span class="stat-label">Terreno</span><span class="stat-value">${mu.rankings?.muTerrain?.value || 0}</span></div>
                 </div>
                 <div class="section-title">👥 Membri della MU (${mu.members?.length || 0})</div>
-            `;
-            if (mu.members && mu.members.length > 0) {
-                const memberNames = await Promise.all(mu.members.map(id => fetchUserById(id)));
-                html += `<div class="members-list">`;
-                memberNames.forEach(user => {
-                    const avatarHtml = user.avatarUrl ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">` : '';
-                    html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px; display:inline-flex; align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
-                });
-                html += `</div>`;
-            } else {
-                html += '<p style="color:#6a8a6a;">Nessun membro.</p>';
-            }
-            detailPanel.innerHTML = html;
-            document.getElementById('backToBattalionBtn').addEventListener('click', () => {
-                renderBattalionDetail(battalionId);
-            });
-        }
-        // ---------- CREAZIONE NUOVO BATTAGLIONE ----------
-        function createNewBattalion() {
-            const name = prompt('Nome del nuovo battaglione:');
-            if (!name) return;
-            const chief = prompt('ID del Capo (opzionale):') || '';
-            const newB = createBattalion(name, chief);
-            battalions.push(newB);
-            saveBattalions();
-            renderBattalionList();
-            selectBattalion(newB.id);
-        }
-                async function autoBalanceBattalions() {
-            const countStr = prompt('In quanti battaglioni vuoi dividere le MU?', '2');
-            if (!countStr) return;
-            const battalionCount = parseInt(countStr, 10);
-            if (isNaN(battalionCount) || battalionCount < 2) {
-                alert('Inserisci un numero valido (minimo 2).');
-                return;
-            }
+                `;
 
-            const muListStr = prompt('Incolla la lista degli ID delle MU (separati da virgola, spazio o a capo):');
-            if (!muListStr) return;
-
-            const muIds = muListStr.split(/[\s,]+/).filter(id => id.trim().length > 0);
-            if (muIds.length === 0) {
-                alert('Nessun ID valido inserito.');
-                return;
-            }
-
-            showToast(`🔄 Caricamento ${muIds.length} MU...`, 'info');
-
-            const muDataList = [];
-            for (const muId of muIds) {
-                try {
-                    let mu = muDataCache.get(muId);
-                    if (!mu) {
-                        mu = await fetchMuById(muId);
-                        muDataCache.set(muId, mu);
-                    }
-                    let muLevel = 0;
-                    if (mu.members) {
-                        await preloadUserNames(mu.members);
-                        mu.members.forEach(userId => {
-                            const user = userCache.get(userId);
-                            if (user) muLevel += user.level || 0;
-                        });
-                    }
-                    muDataList.push({
-                        id: muId,
-                        name: mu.name || muId.slice(-6),
-                        level: muLevel,
-                        members: mu.members?.length || 0
+                if (mu.members && mu.members.length > 0) {
+                    const memberNames = await Promise.all(mu.members.map(id => fetchUserById(id)));
+                    html += `<div class="members-list">`;
+                    memberNames.forEach(user => {
+                        const avatarHtml = user.avatarUrl ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">` : '';
+                        html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px; display:inline-flex; align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
                     });
-                } catch (err) {
-                    console.warn(`MU ${muId} non trovata, la salto.`);
+                    html += `</div>`;
+                } else {
+                    html += '<p style="color:#6a8a6a;">Nessun membro.</p>';
                 }
-            }
-
-            if (muDataList.length === 0) {
-                alert('Nessuna MU valida trovata.');
-                return;
-            }
-
-            muDataList.sort((a, b) => b.level - a.level);
-
-            const newBattalions = [];
-            for (let i = 0; i < battalionCount; i++) {
-                newBattalions.push({
-                    name: `Battaglione ${i + 1}`,
-                    muIds: [],
-                    totalLevel: 0
-                });
-            }
-
-            for (const mu of muDataList) {
-                let minIndex = 0;
-                for (let i = 1; i < newBattalions.length; i++) {
-                    if (newBattalions[i].totalLevel < newBattalions[minIndex].totalLevel) {
-                        minIndex = i;
-                    }
-                }
-                newBattalions[minIndex].muIds.push(mu.id);
-                newBattalions[minIndex].totalLevel += mu.level;
-            }
-
-            let summary = `Distribuzione proposta per ${muDataList.length} MU in ${battalionCount} battaglioni:\n\n`;
-            newBattalions.forEach((b, idx) => {
-                summary += `${b.name}: ${b.muIds.length} MU, Livello Totale: ${b.totalLevel}\n`;
-            });
-            summary += '\nVuoi creare questi battaglioni? (quelli esistenti non verranno cancellati)';
-
-            if (!confirm(summary)) return;
-
-            for (const b of newBattalions) {
-                if (b.muIds.length > 0) {
-                    const newBattalion = createBattalion(b.name);
-                    newBattalion.muIds = b.muIds;
-                    battalions.push(newBattalion);
-                }
-            }
-            saveBattalions();
-
-            renderBattalionList();
-            renderBalancePanel();
-            if (battalions.length > 0 && !selectedBattalionId) {
-                selectBattalion(battalions[0].id);
-            }
-
-            showToast(`✅ Creati ${newBattalions.filter(b => b.muIds.length > 0).length} battaglioni!`, 'success');
-        }
-
-        // ---------- UTILITY ----------
-        function formatNumber(num, isDecimal = false) {
-            if (num === null || num === undefined) return '0';
-            if (isDecimal) return num.toFixed(2);
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-            return num.toString();
-        }
-
-        // ---------- INIZIALIZZAZIONE ----------
-        async function init() {
-            loadBattalions();
-            renderBattalionList();
-            renderBalancePanel();
-            
-            await refreshAllMuData();
-            
-            const allUserIds = new Set();
-            battalions.forEach(b => {
-                b.muIds.forEach(muId => {
-                    const mu = muDataCache.get(muId);
-                    if (mu && mu.members) {
-                        mu.members.forEach(uid => allUserIds.add(uid));
+                detailPanel.innerHTML = html;
+                
+                const backBtn = document.getElementById('backToBattalionBtn');
+                backBtn.addEventListener('click', () => {
+                    if (battalionId) {
+                        renderBattalionDetail(battalionId);
+                    } else {
+                        document.getElementById('csvAnalysisView').classList.add('active');
+                        document.getElementById('battalionsView').classList.remove('active');
+                        renderCsvAnalysis();
                     }
                 });
-                if (b.chiefUserId) allUserIds.add(b.chiefUserId);
-            });
-            if (allUserIds.size > 0) {
-                await preloadUserNames(Array.from(allUserIds), true);
             }
-            
-            renderBattalionList();
-            renderBalancePanel();
-            
-            if (selectedBattalionId) {
-                await renderBattalionDetail(selectedBattalionId);
-            } else if (battalions.length > 0) {
-                await selectBattalion(battalions[0].id);
+            // ---------- CREAZIONE NUOVO BATTAGLIONE ----------
+            function createNewBattalion() {
+                const name = prompt('Nome del nuovo battaglione:');
+                if (!name) return;
+                const chief = prompt('ID del Capo (opzionale):') || '';
+                const newB = createBattalion(name, chief);
+                battalions.push(newB);
+                saveBattalions();
+                renderBattalionList();
+                selectBattalion(newB.id);
             }
-            
-            newBtn.addEventListener('click', createNewBattalion);
-            document.getElementById('autoBalanceBtn').addEventListener('click', autoBalanceBattalions);
-            refreshAllBtn.addEventListener('click', async () => {
+            async function autoBalanceBattalions() {
+                const countStr = prompt('In quanti battaglioni vuoi dividere le MU?', '2');
+                if (!countStr) return;
+                const battalionCount = parseInt(countStr, 10);
+                if (isNaN(battalionCount) || battalionCount < 2) {
+                    alert('Inserisci un numero valido (minimo 2).');
+                    return;
+                }
+
+                const muListStr = prompt('Incolla la lista degli ID delle MU (separati da virgola, spazio o a capo):');
+                if (!muListStr) return;
+
+                const muIds = muListStr.split(/[\s,]+/).filter(id => id.trim().length > 0);
+                if (muIds.length === 0) {
+                    alert('Nessun ID valido inserito.');
+                    return;
+                }
+
+                showToast(`🔄 Caricamento ${muIds.length} MU...`, 'info');
+
+                const muDataList = [];
+                for (const muId of muIds) {
+                    try {
+                        let mu = muDataCache.get(muId);
+                        if (!mu) {
+                            mu = await fetchMuById(muId);
+                            muDataCache.set(muId, mu);
+                        }
+                        let muLevel = 0;
+                        if (mu.members) {
+                            await preloadUserNames(mu.members);
+                            mu.members.forEach(userId => {
+                                const user = userCache.get(userId);
+                                if (user) muLevel += user.level || 0;
+                            });
+                        }
+                        muDataList.push({
+                            id: muId,
+                            name: mu.name || muId.slice(-6),
+                            level: muLevel,
+                            members: mu.members?.length || 0
+                        });
+                    } catch (err) {
+                        console.warn(`MU ${muId} non trovata, la salto.`);
+                    }
+                }
+
+                if (muDataList.length === 0) {
+                    alert('Nessuna MU valida trovata.');
+                    return;
+                }
+
+                muDataList.sort((a, b) => b.level - a.level);
+
+                const newBattalions = [];
+                for (let i = 0; i < battalionCount; i++) {
+                    newBattalions.push({
+                        name: `Battaglione ${i + 1}`,
+                        muIds: [],
+                        totalLevel: 0
+                    });
+                }
+
+                for (const mu of muDataList) {
+                    let minIndex = 0;
+                    for (let i = 1; i < newBattalions.length; i++) {
+                        if (newBattalions[i].totalLevel < newBattalions[minIndex].totalLevel) {
+                            minIndex = i;
+                        }
+                    }
+                    newBattalions[minIndex].muIds.push(mu.id);
+                    newBattalions[minIndex].totalLevel += mu.level;
+                }
+
+                let summary = `Distribuzione proposta per ${muDataList.length} MU in ${battalionCount} battaglioni:\n\n`;
+                newBattalions.forEach((b, idx) => {
+                    summary += `${b.name}: ${b.muIds.length} MU, Livello Totale: ${b.totalLevel}\n`;
+                });
+                summary += '\nVuoi creare questi battaglioni? (quelli esistenti non verranno cancellati)';
+
+                if (!confirm(summary)) return;
+
+                for (const b of newBattalions) {
+                    if (b.muIds.length > 0) {
+                        const newBattalion = createBattalion(b.name);
+                        newBattalion.muIds = b.muIds;
+                        battalions.push(newBattalion);
+                    }
+                }
+                saveBattalions();
+
+                renderBattalionList();
+                renderBalancePanel();
+                if (battalions.length > 0 && !selectedBattalionId) {
+                    selectBattalion(battalions[0].id);
+                }
+
+                showToast(`✅ Creati ${newBattalions.filter(b => b.muIds.length > 0).length} battaglioni!`, 'success');
+            }
+
+            // ---------- UTILITY ----------
+            function formatNumber(num, isDecimal = false) {
+                if (num === null || num === undefined) return '0';
+                if (isDecimal) return num.toFixed(2);
+                if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+                if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+                return num.toString();
+            }
+
+            // ---------- INIZIALIZZAZIONE ----------
+            async function init() {
+                loadBattalions();
+                renderBattalionList();
+                renderBalancePanel();
+
                 await refreshAllMuData();
-                const userIds = new Set();
+
+                const allUserIds = new Set();
                 battalions.forEach(b => {
                     b.muIds.forEach(muId => {
                         const mu = muDataCache.get(muId);
-                        if (mu && mu.members) mu.members.forEach(uid => userIds.add(uid));
+                        if (mu && mu.members) {
+                            mu.members.forEach(uid => allUserIds.add(uid));
+                        }
                     });
-                    if (b.chiefUserId) userIds.add(b.chiefUserId);
+                    if (b.chiefUserId) allUserIds.add(b.chiefUserId);
                 });
-                if (userIds.size > 0) await preloadUserNames(Array.from(userIds), true);
+                if (allUserIds.size > 0) {
+                    await preloadUserNames(Array.from(allUserIds), true);
+                }
+
                 renderBattalionList();
                 renderBalancePanel();
-                if (selectedBattalionId) await renderBattalionDetail(selectedBattalionId);
+
+                if (selectedBattalionId) {
+                    await renderBattalionDetail(selectedBattalionId);
+                } else if (battalions.length > 0) {
+                    await selectBattalion(battalions[0].id);
+                }
+
+                newBtn.addEventListener('click', createNewBattalion);
+                document.getElementById('autoBalanceBtn').addEventListener('click', autoBalanceBattalions);
+                refreshAllBtn.addEventListener('click', async () => {
+                    await refreshAllMuData();
+                    const userIds = new Set();
+                    battalions.forEach(b => {
+                        b.muIds.forEach(muId => {
+                            const mu = muDataCache.get(muId);
+                            if (mu && mu.members) mu.members.forEach(uid => userIds.add(uid));
+                        });
+                        if (b.chiefUserId) userIds.add(b.chiefUserId);
+                    });
+                    if (userIds.size > 0) await preloadUserNames(Array.from(userIds), true);
+                    renderBattalionList();
+                    renderBalancePanel();
+                    if (selectedBattalionId) await renderBattalionDetail(selectedBattalionId);
+                });
+            }
+
+            function initRadar() {
+                const canvas = document.getElementById('radar-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let angle = 0;
+                function drawRadar() {
+                    const w = canvas.width, h = canvas.height;
+                    ctx.clearRect(0, 0, w, h);
+                    // Cerchi concentrici
+                    ctx.strokeStyle = '#00ff8860';
+                    ctx.lineWidth = 1;
+                    for (let i = 1; i <= 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(w / 2, h / 2, w / 2 * i / 3, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    // Linee incrociate
+                    ctx.beginPath();
+                    ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
+                    ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
+                    ctx.strokeStyle = '#00ff8840';
+                    ctx.stroke();
+                    // Settore rotante
+                    ctx.beginPath();
+                    ctx.moveTo(w / 2, h / 2);
+                    ctx.arc(w / 2, h / 2, w / 2, angle, angle + 0.5);
+                    ctx.closePath();
+                    ctx.fillStyle = '#00ff8820';
+                    ctx.fill();
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(w / 2, h / 2, w / 2, angle, angle + 0.5);
+                    ctx.stroke();
+
+                    angle += 0.02;
+                    requestAnimationFrame(drawRadar);
+                }
+                drawRadar();
+            }
+            // ==================== ANALISI CSV ====================
+            const csvUrlInput = document.getElementById('csvUrlInput');
+            const loadCsvUrlBtn = document.getElementById('loadCsvUrlBtn');
+            const clearCsvBtn = document.getElementById('clearCsvBtn');
+           
+            async function loadCsvFromUrl(url) {
+                try {
+                    showToast('Scaricamento CSV...');
+                    const resp = await fetch(url);
+                    if (!resp.ok) throw new Error('Impossibile scaricare il CSV');
+                    const text = await resp.text();
+                    
+                    // Pulisci il testo: rimuovi virgolette e caratteri speciali
+                    const cleanText = text.replace(/["']/g, ' ');
+                    
+                    // Estrai tutti gli ID MU validi (24 caratteri esadecimali)
+                    const idPattern = /[a-f0-9]{24}/gi;
+                    const matches = cleanText.match(idPattern);
+                    
+                    let muIds = [];
+                    if (matches && matches.length > 0) {
+                        // Rimuovi duplicati
+                        muIds = [...new Set(matches.map(id => id.toLowerCase()))];
+                    } else {
+                        // Fallback: prova a splittare per spazi/virgole
+                        const tokens = cleanText.split(/[\s,]+/).filter(t => t.length === 24 && /^[a-f0-9]+$/i.test(t));
+                        muIds = [...new Set(tokens.map(t => t.toLowerCase()))];
+                    }
+                    
+                    if (!muIds.length) throw new Error('Nessun ID MU valido trovato nel CSV');
+                    
+                    showToast(`Trovati ${muIds.length} ID MU validi. Caricamento...`);
+                    await loadCsvMuData(muIds);
+                    renderCsvAnalysis();
+                } catch(e) {
+                    alert('Errore: ' + e.message);
+                }
+            }
+            async function loadCsvMuData(muIds) {
+                csvMuData = [];
+                const uniqueIds = [...new Set(muIds)];
+                const muData = await loadMultipleMus(uniqueIds, true);
+                const allUserIds = new Set();
+                muData.forEach(mu => { if (mu && mu.members) mu.members.forEach(uid => allUserIds.add(uid)); });
+                if (allUserIds.size) await preloadUserNames(Array.from(allUserIds));
+                csvMuData = muData.map(mu => {
+                    if (!mu) return null;
+                    let totalLevel = 0;
+                    if (mu.members) mu.members.forEach(uid => { const u = userCache.get(uid); if (u) totalLevel += u.level; });
+                    return {
+                        id: mu._id,
+                        name: mu.name || 'Sconosciuta',
+                        members: mu.members?.length || 0,
+                        totalLevel,
+                        weeklyDamage: mu.rankings?.muWeeklyDamages?.value || 0,
+                        totalDamage: mu.rankings?.muDamages?.value || 0,
+                        bounty: mu.rankings?.muBounty?.value || 0,
+                        terrain: mu.rankings?.muTerrain?.value || 0
+                    };
+                }).filter(mu => mu !== null);
+                showToast(`✅ ${csvMuData.length} MU caricate`);
+            }
+
+            function renderCsvAnalysis() {
+                const tbody = document.getElementById('csvAnalysisBody');
+                if (!csvMuData.length) {
+                    tbody.innerHTML = '<tr><td colspan="8">Nessun dato</td></tr>';
+                    return;
+                }
+                const totalMembers = csvMuData.reduce((s,m)=>s+m.members,0);
+                const totalLevel = csvMuData.reduce((s,m)=>s+m.totalLevel,0);
+                const totalWeekly = csvMuData.reduce((s,m)=>s+m.weeklyDamage,0);
+                const totalDamage = csvMuData.reduce((s,m)=>s+m.totalDamage,0);
+                const totalBounty = csvMuData.reduce((s,m)=>s+m.bounty,0);
+                const avgTerrain = (csvMuData.reduce((s,m)=>s+m.terrain,0) / csvMuData.length).toFixed(1);
+                document.getElementById('csvStatsSummary').innerHTML = `
+                    <div class="stat"><span class="stat-label">Totale MU</span><span class="stat-value">${csvMuData.length}</span></div>
+                    <div class="stat"><span class="stat-label">Membri</span><span class="stat-value">${totalMembers}</span></div>
+                    <div class="stat"><span class="stat-label">Livello Tot.</span><span class="stat-value">${totalLevel}</span></div>
+                    <div class="stat"><span class="stat-label">Danno Sett.</span><span class="stat-value">${formatNumber(totalWeekly)}</span></div>
+                    <div class="stat"><span class="stat-label">Danno Tot.</span><span class="stat-value">${formatNumber(totalDamage)}</span></div>
+                    <div class="stat"><span class="stat-label">Bounty</span><span class="stat-value">${formatNumber(totalBounty, true)}</span></div>
+                    <div class="stat"><span class="stat-label">Terreno medio</span><span class="stat-value">${avgTerrain}</span></div>
+                `;
+                tbody.innerHTML = csvMuData.map(mu => `
+                    <tr>
+                        <td><a href="${APP_BASE}/mu/${mu.id}" target="_blank">${mu.name}</a></td>
+                        <td>${mu.members}</td>
+                        <td>${mu.totalLevel}</td>
+                        <td>${formatNumber(mu.weeklyDamage)}</td>
+                        <td>${formatNumber(mu.totalDamage)}</td>
+                        <td>${formatNumber(mu.bounty, true)}</td>
+                        <td>${mu.terrain}</td>
+                        <td><button class="secondary view-csv-mu-members" data-mu-id="${mu.id}"><i class="fas fa-users"></i> Membri</button></td>
+                    </tr>
+                `).join('');
+
+                document.querySelectorAll('.view-csv-mu-members').forEach(btn => {
+                    btn.addEventListener('click', () => showMuDetail(btn.dataset.muId, null));
+                });
+
+                const top10 = [...csvMuData].sort((a,b)=>b.weeklyDamage - a.weeklyDamage).slice(0,10);
+                const damageCtx = document.getElementById('csvDamageChart').getContext('2d');
+                if (csvDamageChart) csvDamageChart.destroy();
+                csvDamageChart = new Chart(damageCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: top10.map(mu => mu.name.length>15 ? mu.name.substr(0,12)+'...' : mu.name),
+                        datasets: [{
+                            label: 'Danno Settimanale (Top 10)',
+                            data: top10.map(mu => mu.weeklyDamage),
+                            backgroundColor: '#00ff8860',
+                            borderColor: '#00ff88',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
+                });
+
+                const levelCtx = document.getElementById('csvLevelChart').getContext('2d');
+                if (csvLevelChart) csvLevelChart.destroy();
+                csvLevelChart = new Chart(levelCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: csvMuData.map(mu => mu.name.length>15 ? mu.name.substr(0,12)+'...' : mu.name),
+                        datasets: [{
+                            label: 'Livello Totale',
+                            data: csvMuData.map(mu => mu.totalLevel),
+                            backgroundColor: '#00ff8860',
+                            borderColor: '#00ff88',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
+                });
+            }
+
+            loadCsvUrlBtn.addEventListener('click', () => {
+                const url = csvUrlInput.value.trim();
+                if (!url) { alert('Inserisci un URL'); return; }
+                loadCsvFromUrl(url);
             });
-        }
 
-        function initRadar() {
-    const canvas = document.getElementById('radar-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let angle = 0;
-    function drawRadar() {
-        const w = canvas.width, h = canvas.height;
-        ctx.clearRect(0, 0, w, h);
-        // Cerchi concentrici
-        ctx.strokeStyle = '#00ff8860';
-        ctx.lineWidth = 1;
-        for (let i = 1; i <= 3; i++) {
-            ctx.beginPath();
-            ctx.arc(w/2, h/2, w/2 * i/3, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-        // Linee incrociate
-        ctx.beginPath();
-        ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h);
-        ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
-        ctx.strokeStyle = '#00ff8840';
-        ctx.stroke();
-        // Settore rotante
-        ctx.beginPath();
-        ctx.moveTo(w/2, h/2);
-        ctx.arc(w/2, h/2, w/2, angle, angle + 0.5);
-        ctx.closePath();
-        ctx.fillStyle = '#00ff8820';
-        ctx.fill();
-        ctx.strokeStyle = '#00ff88';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(w/2, h/2, w/2, angle, angle + 0.5);
-        ctx.stroke();
-        
-        angle += 0.02;
-        requestAnimationFrame(drawRadar);
-    }
-    drawRadar();
-}
-
-// Chiama initRadar() dopo il caricamento
-window.addEventListener('load', () => {
-    initRadar();
-});
-        init();
-    })();
-</script>
+            clearCsvBtn.addEventListener('click', () => {
+                csvMuData = [];
+                csvUrlInput.value = '';
+                document.getElementById('csvStatsSummary').innerHTML = '';
+                document.getElementById('csvAnalysisBody').innerHTML = '<tr><td colspan="8" style="text-align:center;">Inserisci un URL e clicca Carica</td></tr>';
+                if (csvDamageChart) csvDamageChart.destroy();
+                if (csvLevelChart) csvLevelChart.destroy();
+            });
+            // Chiama initRadar() dopo il caricamento
+            window.addEventListener('load', () => {
+                initRadar();
+            });
+            init();
+        })();
+    </script>
 </body>
+
 </html>
