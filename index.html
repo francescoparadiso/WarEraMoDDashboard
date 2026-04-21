@@ -756,8 +756,15 @@
             const API_BASE = 'https://gateway.warerastats.io/trpc';
             const APP_BASE = 'https://app.warera.io';
             // Token per il gateway (hardcodato, senza prompt)
-            const API_KEY = 'wae_e35a51f4565f0cf817efa005e01ed2971c37efd11c378570e0f357f36f9441e2';
-
+let API_KEY = localStorage.getItem('warera_api_key');
+if (!API_KEY) {
+    API_KEY = prompt('Inserisci la tua API key di WarEra (ottenibile dalle impostazioni del profilo su app.warera.io):');
+    if (API_KEY) {
+        localStorage.setItem('warera_api_key', API_KEY);
+    } else {
+        alert('API key necessaria per usare il gateway. La dashboard potrebbe non funzionare.');
+    }
+}
             // Stato globale
             let battalions = [];
             let selectedBattalionId = null;
