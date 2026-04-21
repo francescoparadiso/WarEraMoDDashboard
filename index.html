@@ -986,7 +986,7 @@ if (!API_KEY) {
                 // Aggiungi header Authorization se API_KEY è presente
                 const headers = {
                     'Content-Type': 'application/json',
-                    ...(API_KEY && { 'Authorization': `Bearer ${API_KEY}` })
+                    ...(API_KEY && { 'X-API-KEY': API_KEY})
                 };
 
                 const finalOptions = {
