@@ -673,6 +673,98 @@
                 left: 10px;
             }
         }
+
+        /* Fissa la larghezza della tabella e allinea colonne */
+        #csvAnalysisTable {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Larghezze percentuali per ogni colonna (adatta secondo le tue esigenze) */
+        #csvAnalysisTable th:nth-child(1) {
+            width: 18%;
+        }
+
+        /* Nome MU */
+        #csvAnalysisTable th:nth-child(2) {
+            width: 6%;
+        }
+
+        /* Membri */
+        #csvAnalysisTable th:nth-child(3) {
+            width: 8%;
+        }
+
+        /* Livello Tot. */
+        #csvAnalysisTable th:nth-child(4) {
+            width: 9%;
+        }
+
+        /* Danno Sett. */
+        #csvAnalysisTable th:nth-child(5) {
+            width: 9%;
+        }
+
+        /* Danno Tot. */
+        #csvAnalysisTable th:nth-child(6) {
+            width: 8%;
+        }
+
+        /* Bounty */
+        #csvAnalysisTable th:nth-child(7) {
+            width: 7%;
+        }
+
+        /* Terreno */
+        #csvAnalysisTable th:nth-child(8) {
+            width: 9%;
+        }
+
+        /* Danno/Membro */
+        #csvAnalysisTable th:nth-child(9) {
+            width: 9%;
+        }
+
+        /* Bounty/Membro */
+        #csvAnalysisTable th:nth-child(10) {
+            width: 7%;
+        }
+
+        /* Azioni */
+
+        /* Allineamento testo nelle celle (opzionale) */
+        #csvAnalysisTable td,
+        #csvAnalysisTable th {
+            text-align: left;
+            vertical-align: middle;
+            padding: 8px 6px;
+            word-wrap: break-word;
+        }
+
+        /* Su mobile mantieni lo scroll orizzontale ma con larghezze fisse */
+        @media (max-width: 768px) {
+            #csvAnalysisTable {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Su mobile le larghezze fisse vengono rispettate, ma se vuoi puoi adattarle */
+        }
+
+        /* Forza larghezza piena per la tabella CSV */
+        #csvAnalysisTable {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+            display: table;
+        }
+
+        /* Abilita scroll orizzontale nel pannello di dettaglio CSV */
+        #csvAnalysisView .detail-panel {
+            overflow-x: auto;
+        }
     </style>
 </head>
 
@@ -756,6 +848,9 @@
                     <div style="flex:1; height:300px;"><canvas id="csvDamageChart"></canvas></div>
                     <div style="flex:1; height:300px;"><canvas id="csvLevelChart"></canvas></div>
                 </div>
+                <div style="margin-bottom:30px;">
+                    <div style="height:300px;"><canvas id="csvMembersChart"></canvas></div>
+                </div>
                 <table id="csvAnalysisTable">
                     <thead>
                         <tr>
@@ -785,6 +880,8 @@
         (function () {
             // ---------- CONFIGURAZIONE ----------
             const API_BASE = 'https://gateway.warerastats.io/trpc';
+            //const API_BASE = 'https://api2.warera.io/trpc';
+            
             const APP_BASE = 'https://app.warera.io';
             // Token per il gateway (hardcodato, senza prompt)
             let API_KEY = localStorage.getItem('warera_api_key');
@@ -803,7 +900,9 @@
             let userCache = new Map();          // userId -> { name, ... }
             let userAliasMap = new Map(); // per eventuali alias manuali
             let csvSortColumn = 'weeklyDamage';
+
             let csvSortDirection = 'desc'; // 'asc' o 'desc'
+
             // Elementi DOM
             const battalionListDiv = document.getElementById('battalionListContainer');
             const detailPanel = document.getElementById('detailPanel');
@@ -828,7 +927,22 @@
             // Stato Analisi CSV
             let csvMuData = [];
             let csvDamageChart = null;
+            let csvMembersChart = null;
             let csvLevelChart = null;
+
+            // Delega degli eventi per l'ordinamento della tabella CSV
+            document.getElementById('csvAnalysisTable')?.addEventListener('click', (e) => {
+                const th = e.target.closest('th[data-sort]');
+                if (!th) return;
+                const column = th.dataset.sort;
+                if (csvSortColumn === column) {
+                    csvSortDirection = csvSortDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    csvSortColumn = column;
+                    csvSortDirection = 'desc'; // default decrescente
+                }
+                renderCsvAnalysis();
+            });
 
             // ---------- MODELLO BATTAGLIONE ----------
             function createBattalion(name, chiefUserId = '') {
@@ -855,12 +969,25 @@
             }
             function sortCsvData(data, column, direction) {
                 return [...data].sort((a, b) => {
-                    let valA = a[column];
-                    let valB = b[column];
+                    let valA, valB;
+
+                    // Gestisci colonne calcolate
+                    if (column === 'dmgPerMember') {
+                        valA = a.members ? a.totalDamage / a.members : 0;
+                        valB = b.members ? b.totalDamage / b.members : 0;
+                    } else if (column === 'bountyPerMember') {
+                        valA = a.members ? a.bounty / a.members : 0;
+                        valB = b.members ? b.bounty / b.members : 0;
+                    } else {
+                        valA = a[column];
+                        valB = b[column];
+                    }
+
                     if (column === 'name') {
                         valA = valA.toLowerCase();
                         valB = valB.toLowerCase();
                     }
+
                     if (typeof valA === 'string') {
                         return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
                     } else {
@@ -1695,32 +1822,28 @@
             const clearCsvBtn = document.getElementById('clearCsvBtn');
 
             async function loadCsvFromUrl(url) {
+                // Mostra subito un toast di caricamento
+                showToast('📡 Scaricamento CSV in corso...', 'info');
                 try {
-                    showToast('Scaricamento CSV...');
                     const resp = await fetch(url);
                     if (!resp.ok) throw new Error('Impossibile scaricare il CSV');
                     const text = await resp.text();
 
-                    // Pulisci il testo: rimuovi virgolette e caratteri speciali
                     const cleanText = text.replace(/["']/g, ' ');
-
-                    // Estrai tutti gli ID MU validi (24 caratteri esadecimali)
                     const idPattern = /[a-f0-9]{24}/gi;
                     const matches = cleanText.match(idPattern);
 
                     let muIds = [];
                     if (matches && matches.length > 0) {
-                        // Rimuovi duplicati
                         muIds = [...new Set(matches.map(id => id.toLowerCase()))];
                     } else {
-                        // Fallback: prova a splittare per spazi/virgole
                         const tokens = cleanText.split(/[\s,]+/).filter(t => t.length === 24 && /^[a-f0-9]+$/i.test(t));
                         muIds = [...new Set(tokens.map(t => t.toLowerCase()))];
                     }
 
                     if (!muIds.length) throw new Error('Nessun ID MU valido trovato nel CSV');
 
-                    showToast(`Trovati ${muIds.length} ID MU validi. Caricamento...`);
+                    showToast(`🔍 Trovati ${muIds.length} ID MU. Avvio richieste API...`, 'info');
                     await loadCsvMuData(muIds);
                     renderCsvAnalysis();
                 } catch (e) {
@@ -1752,6 +1875,8 @@
                 showToast(`✅ ${csvMuData.length} MU caricate`);
             }
 
+            let lastRenderedDataHash = ''; // per tenere traccia dei dati già disegnati
+
             function renderCsvAnalysis() {
                 const tbody = document.getElementById('csvAnalysisBody');
                 if (!csvMuData.length) {
@@ -1759,9 +1884,17 @@
                     return;
                 }
 
-                // Ordina i dati
-                const sortedData = sortCsvData(csvMuData, csvSortColumn, csvSortDirection);
+                // Arricchisci i dati con le colonne calcolate PRIMA di ordinare
+                const enrichedData = csvMuData.map(mu => ({
+                    ...mu,
+                    dmgPerMember: mu.members ? (mu.totalDamage / mu.members) : 0,
+                    bountyPerMember: mu.members ? (mu.bounty / mu.members) : 0
+                }));
 
+                // Ordina i dati arricchiti
+                const sortedData = sortCsvData(enrichedData, csvSortColumn, csvSortDirection);
+
+                // Calcola statistiche aggregate
                 const totalMembers = sortedData.reduce((s, m) => s + m.members, 0);
                 const totalLevel = sortedData.reduce((s, m) => s + m.totalLevel, 0);
                 const totalWeekly = sortedData.reduce((s, m) => s + m.weeklyDamage, 0);
@@ -1779,6 +1912,7 @@
                     <div class="stat"><span class="stat-label">Terreno medio</span><span class="stat-value">${avgTerrain}</span></div>
                 `;
 
+                // Rigenera la tabella
                 tbody.innerHTML = sortedData.map(mu => {
                     const dmgPerMember = mu.members ? (mu.totalDamage / mu.members).toFixed(0) : '0';
                     const bountyPerMember = mu.members ? (mu.bounty / mu.members).toFixed(2) : '0.00';
@@ -1798,6 +1932,7 @@
                 `}).join('');
 
                 // Aggiorna icone ordinamento
+                // Reset tutte le icone
                 document.querySelectorAll('#csvAnalysisTable th[data-sort] i').forEach(icon => {
                     icon.className = 'fas fa-sort';
                 });
@@ -1806,60 +1941,86 @@
                     activeHeader.className = csvSortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
                 }
 
-                // Listener per intestazioni
-                document.querySelectorAll('#csvAnalysisTable th[data-sort]').forEach(th => {
-                    th.style.cursor = 'pointer';
-                    th.addEventListener('click', () => {
-                        const column = th.dataset.sort;
-                        if (csvSortColumn === column) {
-                            csvSortDirection = csvSortDirection === 'asc' ? 'desc' : 'asc';
-                        } else {
-                            csvSortColumn = column;
-                            csvSortDirection = 'desc';
-                        }
-                        renderCsvAnalysis();
-                    });
-                });
-
+                // Listener per pulsanti membri
                 document.querySelectorAll('.view-csv-mu-members').forEach(btn => {
                     btn.addEventListener('click', () => showMuDetail(btn.dataset.muId, null));
                 });
 
-                // Grafici (invariati)
-                const top10 = [...sortedData].sort((a, b) => b.weeklyDamage - a.weeklyDamage).slice(0, 10);
-                const damageCtx = document.getElementById('csvDamageChart').getContext('2d');
-                if (csvDamageChart) csvDamageChart.destroy();
-                csvDamageChart = new Chart(damageCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: top10.map(mu => mu.name.length > 15 ? mu.name.substr(0, 12) + '...' : mu.name),
-                        datasets: [{
-                            label: 'Danno Settimanale (Top 10)',
-                            data: top10.map(mu => mu.weeklyDamage),
-                            backgroundColor: '#00ff8860',
-                            borderColor: '#00ff88',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
-                });
+                // ** Grafici: li aggiorniamo solo se i dati sottostanti sono cambiati **
+                const currentDataHash = JSON.stringify(csvMuData.map(m => m.id).sort());
+                if (currentDataHash !== lastRenderedDataHash) {
+                    lastRenderedDataHash = currentDataHash;
 
-                const levelCtx = document.getElementById('csvLevelChart').getContext('2d');
-                if (csvLevelChart) csvLevelChart.destroy();
-                csvLevelChart = new Chart(levelCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: sortedData.map(mu => mu.name.length > 15 ? mu.name.substr(0, 12) + '...' : mu.name),
-                        datasets: [{
-                            label: 'Livello Totale',
-                            data: sortedData.map(mu => mu.totalLevel),
-                            backgroundColor: '#00ff8860',
-                            borderColor: '#00ff88',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
-                });
+                    const top10 = [...csvMuData].sort((a, b) => b.weeklyDamage - a.weeklyDamage).slice(0, 10);
+                    const damageCtx = document.getElementById('csvDamageChart').getContext('2d');
+                    if (csvDamageChart) csvDamageChart.destroy();
+                    csvDamageChart = new Chart(damageCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: top10.map(mu => mu.name.length > 15 ? mu.name.substr(0, 12) + '...' : mu.name),
+                            datasets: [{
+                                label: 'Danno Settimanale (Top 10)',
+                                data: top10.map(mu => mu.weeklyDamage),
+                                backgroundColor: '#00ff8860',
+                                borderColor: '#00ff88',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
+                    });
+
+                    const levelCtx = document.getElementById('csvLevelChart').getContext('2d');
+                    if (csvLevelChart) csvLevelChart.destroy();
+                    csvLevelChart = new Chart(levelCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: csvMuData.map(mu => mu.name.length > 15 ? mu.name.substr(0, 12) + '...' : mu.name),
+                            datasets: [{
+                                label: 'Livello Totale',
+                                data: csvMuData.map(mu => mu.totalLevel),
+                                backgroundColor: '#00ff8860',
+                                borderColor: '#00ff88',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#d0e0d0' } } } }
+                    });
+                    // Grafico a torta: distribuzione membri
+                    // Grafico a torta: Danno Settimanale
+                    const membersCtx = document.getElementById('csvMembersChart').getContext('2d');
+                    if (csvMembersChart) csvMembersChart.destroy();
+                    csvMembersChart = new Chart(membersCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: csvMuData.map(mu => mu.name.length > 15 ? mu.name.substr(0, 12) + '...' : mu.name),
+                            datasets: [{
+                                label: 'Danno Settimanale',
+                                data: csvMuData.map(mu => mu.weeklyDamage),
+                                backgroundColor: [
+                                    '#00ff88', '#2ecc71', '#27ae60', '#1abc9c', '#16a085',
+                                    '#00d4ff', '#3498db', '#2980b9', '#9b59b6', '#8e44ad'
+                                ],
+                                borderColor: '#0a0f0c',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#d0e0d0' } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => {
+                                            const val = context.raw;
+                                            return ` ${context.label}: ${formatNumber(val)}`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
             }
 
 
@@ -1873,6 +2034,7 @@
                 document.getElementById('csvAnalysisBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Carica i dati per iniziare</td></tr>';
                 if (csvDamageChart) csvDamageChart.destroy();
                 if (csvLevelChart) csvLevelChart.destroy();
+                if (csvMembersChart) csvMembersChart.destroy();
             });
 
             // Listener per tornare alla vista battaglioni
