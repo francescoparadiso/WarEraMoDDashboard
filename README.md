@@ -7,11 +7,11 @@ Dashboard per il Ministro della Difesa di WarEra.io — gestione battaglioni e a
 
 ```
 ├── src/
-│   └── main.js          ← tutto il JavaScript
-├── index.html           ← HTML + CSS
-├── Mu.csv               ← lista ID delle MU
+│   └── main.js          
+├── index.html           
+├── Mu.csv               
 ├── package.json
-├── vite.config.js       ← ricordati di mettere il nome corretto del repo!
+├── vite.config.js       
 └── .github/
     └── workflows/
         └── deploy.yml   ← deploy automatico su Pages
