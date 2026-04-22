@@ -1,0 +1,16 @@
+{
+  "name": "warera-mod-dashboard",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@wareraprojects/api": "latest",
+    "chart.js": "^4.4.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
