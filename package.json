@@ -7,7 +7,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@wareraprojects/api": "latest",
+    "@wareraprojects/api": "^0.2.2",
     "chart.js": "^4.4.0"
   },
   "devDependencies": {
