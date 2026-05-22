@@ -1,26 +1,11 @@
-import { createAPIClient } from '@wareraprojects/api';
 import Chart from 'chart.js/auto';
 
 // ==================== CONFIG ====================
 const APP_BASE = 'https://app.warera.io';
+const API_BASE = 'https://politicalview-proxy.fra-paradiso2.workers.dev/cache';
 const HARDCODED_CSV_URL =
   'https://raw.githubusercontent.com/francescoparadiso/WarEraMoDDashboard/refs/heads/main/Mu.csv';
 
-// ==================== API KEY ====================
-let API_KEY = localStorage.getItem('warera_api_key');
-if (!API_KEY) {
-  API_KEY = prompt(
-    'Inserisci la tua API key di WarEra (ottenibile dalle impostazioni del profilo su app.warera.io):'
-  );
-  if (API_KEY) {
-    localStorage.setItem('warera_api_key', API_KEY);
-  } else {
-    alert('API key necessaria. La dashboard potrebbe non funzionare.');
-  }
-}
-
-// Il client gestisce automaticamente: batching, rate limit, retry
-const client = createAPIClient({ apiKey: API_KEY || '' });
 
 // ==================== STATO GLOBALE ====================
 let battalions = [];
@@ -137,14 +122,17 @@ function initRadar() {
 // ==================== API: MU ====================
 async function fetchMuById(muId) {
   try {
-    // @wareraprojects/api gestisce batching e rate limit automaticamente
-    const data = await client.mu.getById({ muId });
-    if (!data) { console.warn(`MU ${muId} restituisce dati nulli`); return null; }
+    const url = `${API_BASE}/mu?id=${encodeURIComponent(muId)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if (!data) return null;
+    // Assicura che la struttura sia come quella che usava tRPC
     if (!data.members) data.members = [];
     if (!data.rankings) data.rankings = {};
     return data;
   } catch (err) {
-    console.error(`❌ Errore fetch MU ${muId}:`, err);
+    console.error(`Errore fetch MU ${muId}:`, err);
     throw err;
   }
 }
@@ -157,9 +145,17 @@ async function fetchUserById(userId) {
   if (userCache.has(userId)) return userCache.get(userId);
 
   try {
-    const data = await client.user.getUserLite({ userId });
+    const url = `${API_BASE}/user?id=${encodeURIComponent(userId)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
     const name = data.username || data.name || `ID: ${userId.slice(-6)}`;
-    const user = { name, id: userId, avatarUrl: data.avatarUrl || null, level: data.leveling?.level || 0 };
+    const user = {
+      name,
+      id: userId,
+      avatarUrl: data.avatarUrl || null,
+      level: data.leveling?.level || 0,
+    };
     userCache.set(userId, user);
     return user;
   } catch (err) {
@@ -218,13 +214,70 @@ function createBattalion(name, chiefUserId = '') {
 function loadBattalions() {
   const stored = localStorage.getItem('warera_battalions_v2');
   if (stored) {
-    try { battalions = JSON.parse(stored); } catch { battalions = []; }
-  } else {
-    const example = createBattalion('1ª Divisione Corazzata');
-    example.chiefUserId = '69696382422cd6752173a622';
-    example.muIds = ['6973b4d3eed64c805d54bd07'];
-    battalions = [example];
+    try {
+      battalions = JSON.parse(stored);
+      return;
+    } catch (e) {
+      console.warn('Errore parsing battaglioni salvati', e);
+    }
   }
+
+  // --- Nessun dato salvato: crea i 4 battaglioni predefiniti ---
+  battalions = [
+    {
+      id: 'b_default_I',
+      name: 'Battaglione I',
+      chiefUserId: '',
+      muIds: [
+        '69a1e22949bc4af6d2abaf3f',
+        '69bb39bbd079dc7ca5d47276',
+        '69de83ed0e1f8588dc487d4b',
+        '69f0ff2b03e842494bcce2ed',
+        '69e76833f7b095e977ca0c10',
+        '6a00f61892e353276d7c6f34'
+      ]
+    },
+    {
+      id: 'b_default_II',
+      name: 'Battaglione II',
+      chiefUserId: '',
+      muIds: [
+        '6995cecc7bb099ced6e188e6',
+        '69f9063c0770ed5cc6e7b346',
+        '6886502bdb293829ac2d83ff',
+        '69d769fe08b7bb649764c2d2',
+        '69e7b760f9474bb158eb2952',
+        '69f9f051d04c814cddf7458f'
+      ]
+    },
+    {
+      id: 'b_default_III',
+      name: 'Battaglione III',
+      chiefUserId: '',
+      muIds: [
+        '68fba5fc1e6dc00c9dc82823',
+        '6995925be855fe967aeee814',
+        '69f9bcd3b245fa3c49bb338f',
+        '69fe0248c513525f28c2e031',
+        '69daabf2f66a3dde50919054',
+        '69df6a25a03070cad536d540'
+      ]
+    },
+    {
+      id: 'b_default_IV',
+      name: 'Battaglione IV',
+      chiefUserId: '',
+      muIds: [
+        '696555d7cde9ff82a479dffd',
+        '6973b4d3eed64c805d54bd07',
+        '69d0089dabdcd354687f45cc',
+        '69e1e02e8515e0b071741bf6'
+      ]
+    }
+  ];
+
+  // Salva subito i battaglioni predefiniti per evitare di ricrearli al prossimo avvio
+  saveBattalions();
 }
 
 function saveBattalions() {
