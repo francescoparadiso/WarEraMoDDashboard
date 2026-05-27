@@ -90,7 +90,7 @@ function initRadar() {
   function drawRadar() {
     const w = canvas.width, h = canvas.height;
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = '#00ff8860';
+    ctx.strokeStyle = '#f5a62360';
     ctx.lineWidth = 1;
     for (let i = 1; i <= 3; i++) {
       ctx.beginPath();
@@ -100,15 +100,15 @@ function initRadar() {
     ctx.beginPath();
     ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h);
     ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2);
-    ctx.strokeStyle = '#00ff8840';
+    ctx.strokeStyle = '#f5a62340';
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(w / 2, h / 2);
     ctx.arc(w / 2, h / 2, w / 2, angle, angle + 0.5);
     ctx.closePath();
-    ctx.fillStyle = '#00ff8820';
+    ctx.fillStyle = '#f5a62320';
     ctx.fill();
-    ctx.strokeStyle = '#00ff88';
+    ctx.strokeStyle = '#f5a623';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(w / 2, h / 2, w / 2, angle, angle + 0.5);
@@ -481,7 +481,8 @@ async function renderBattalionDetail(battalionId) {
       const avatarHtml = user.avatarUrl
         ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">`
         : '';
-      html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px;display:inline-flex;align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
+      const isElite = (user.level || 0) >= 20;
+      html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge${isElite ? ' badge-elite' : ''}" style="margin:4px;display:inline-flex;align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
     });
     html += `</div>`;
   } else {
@@ -599,7 +600,8 @@ async function showMuDetail(muId, battalionId) {
       const avatarHtml = user.avatarUrl
         ? `<img src="${user.avatarUrl}" style="width:20px;height:20px;border-radius:50%;border:1px solid #00ff88;margin-right:4px;object-fit:cover;">`
         : '';
-      html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge" style="margin:4px;display:inline-flex;align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
+      const isElite = (user.level || 0) >= 20;
+      html += `<a href="${APP_BASE}/user/${user.id}" target="_blank" class="badge${isElite ? ' badge-elite' : ''}" style="margin:4px;display:inline-flex;align-items:center;">${avatarHtml}${user.name} (Lv.${user.level || 0})</a>`;
     });
     html += `</div>`;
   } else {
@@ -725,7 +727,7 @@ function buildCharts() {
     type: 'bar',
     data: {
       labels: top10.map(m => truncName(m.name)),
-      datasets: [{ label: 'Danno Sett. (Top 10)', data: top10.map(m => m.weeklyDamage), backgroundColor: '#00ff8860', borderColor: '#00ff88', borderWidth: 1 }],
+      datasets: [{ label: 'Danno Sett. (Top 10)', data: top10.map(m => m.weeklyDamage), backgroundColor: '#f5a62360', borderColor: '#f5a623', borderWidth: 1 }],
     },
     options: chartOpts,
   });
@@ -734,7 +736,7 @@ function buildCharts() {
     type: 'bar',
     data: {
       labels: csvMuData.map(m => truncName(m.name)),
-      datasets: [{ label: 'Livello Totale', data: csvMuData.map(m => m.totalLevel), backgroundColor: '#00ff8860', borderColor: '#00ff88', borderWidth: 1 }],
+      datasets: [{ label: 'Livello Totale', data: csvMuData.map(m => m.totalLevel), backgroundColor: '#f5a62360', borderColor: '#f5a623', borderWidth: 1 }],
     },
     options: chartOpts,
   });
@@ -745,7 +747,7 @@ function buildCharts() {
       labels: csvMuData.map(m => truncName(m.name)),
       datasets: [{
         data: csvMuData.map(m => m.weeklyDamage),
-        backgroundColor: ['#00ff88','#2ecc71','#27ae60','#1abc9c','#16a085','#00d4ff','#3498db','#2980b9','#9b59b6','#8e44ad'],
+        backgroundColor: ['#f5a623','#2ecc71','#27ae60','#1abc9c','#16a085','#00d4ff','#3498db','#2980b9','#9b59b6','#8e44ad'],
         borderColor: '#0a0f0c', borderWidth: 1,
       }],
     },
@@ -762,7 +764,7 @@ function buildCharts() {
     type: 'bar',
     data: {
       labels: top10weekly.map(m => truncName(m.name)),
-      datasets: [{ label: 'Danno Sett./Membro (Top 10)', data: top10weekly.map(m => m.value), backgroundColor: '#00ff8860', borderColor: '#00ff88', borderWidth: 1 }],
+      datasets: [{ label: 'Danno Sett./Membro (Top 10)', data: top10weekly.map(m => m.value), backgroundColor: '#f5a62360', borderColor: '#f5a623', borderWidth: 1 }],
     },
     options: chartOpts,
   });
@@ -775,6 +777,7 @@ function sortCsvData(data, column, direction) {
     if (column === 'dmgPerMember') { valA = a.members ? a.totalDamage / a.members : 0; valB = b.members ? b.totalDamage / b.members : 0; }
     else if (column === 'weeklyPerMember') { valA = a.members ? a.weeklyDamage / a.members : 0; valB = b.members ? b.weeklyDamage / b.members : 0; }
     else if (column === 'bountyPerMember') { valA = a.members ? a.bounty / a.members : 0; valB = b.members ? b.bounty / b.members : 0; }
+    else if (column === 'efficiency') { valA = a.totalLevel ? a.weeklyDamage / a.totalLevel : 0; valB = b.totalLevel ? b.weeklyDamage / b.totalLevel : 0; }
     else { valA = a[column]; valB = b[column]; }
     if (column === 'name') { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
     if (typeof valA === 'string') return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -843,37 +846,55 @@ async function loadCsvMuData(muIds) {
 // ==================== CSV: RENDER ====================
 function renderCsvAnalysis() {
   const tbody = document.getElementById('csvAnalysisBody');
-  if (!csvMuData.length) { tbody.innerHTML = '<tr><td colspan="11">Nessun dato</td></tr>'; return; }
+  if (!csvMuData.length) { tbody.innerHTML = '<tr><td colspan="13">Nessun dato</td></tr>'; return; }
 
   const enrichedData = csvMuData.map(mu => ({
     ...mu,
-    dmgPerMember: mu.members ? mu.totalDamage / mu.members : 0,
+    dmgPerMember:    mu.members ? mu.totalDamage  / mu.members : 0,
     weeklyPerMember: mu.members ? mu.weeklyDamage / mu.members : 0,
-    bountyPerMember: mu.members ? mu.bounty / mu.members : 0,
+    bountyPerMember: mu.members ? mu.bounty       / mu.members : 0,
+    // Efficienza offensiva: danno settimanale per punto livello (misura quanto ogni livello "produce")
+    efficiency:      mu.totalLevel ? (mu.weeklyDamage / mu.totalLevel) : 0,
   }));
   const sortedData = sortCsvData(enrichedData, csvSortColumn, csvSortDirection);
 
   const totalMembers = sortedData.reduce((s, m) => s + m.members, 0);
-  const totalLevel = sortedData.reduce((s, m) => s + m.totalLevel, 0);
-  const totalWeekly = sortedData.reduce((s, m) => s + m.weeklyDamage, 0);
-  const totalDamage = sortedData.reduce((s, m) => s + m.totalDamage, 0);
-  const totalBounty = sortedData.reduce((s, m) => s + m.bounty, 0);
-  const avgTerrain = (sortedData.reduce((s, m) => s + m.terrain, 0) / sortedData.length).toFixed(1);
+  const totalLevel   = sortedData.reduce((s, m) => s + m.totalLevel, 0);
+  const totalWeekly  = sortedData.reduce((s, m) => s + m.weeklyDamage, 0);
+  const totalDamage  = sortedData.reduce((s, m) => s + m.totalDamage, 0);
+  const totalBounty  = sortedData.reduce((s, m) => s + m.bounty, 0);
+  const avgTerrain   = (sortedData.reduce((s, m) => s + m.terrain, 0) / sortedData.length).toFixed(1);
+  const avgLvPerMem  = totalMembers ? Math.round(totalLevel / totalMembers) : 0;
+  const topMu        = [...sortedData].sort((a,b) => b.weeklyDamage - a.weeklyDamage)[0];
+  const topEffMu     = [...sortedData].sort((a,b) => b.efficiency - a.efficiency)[0];
 
   document.getElementById('csvStatsSummary').innerHTML = `
     <div class="stat"><span class="stat-label">Totale MU</span><span class="stat-value">${sortedData.length}</span></div>
     <div class="stat"><span class="stat-label">Membri</span><span class="stat-value">${totalMembers}</span></div>
-    <div class="stat"><span class="stat-label">Livello Tot.</span><span class="stat-value">${totalLevel}</span></div>
+    <div class="stat"><span class="stat-label">Livello Tot.</span><span class="stat-value">${formatNumber(totalLevel)}</span></div>
+    <div class="stat"><span class="stat-label">Lv. Medio/Mem</span><span class="stat-value">${avgLvPerMem}</span></div>
     <div class="stat"><span class="stat-label">Danno Sett.</span><span class="stat-value">${formatNumber(totalWeekly)}</span></div>
     <div class="stat"><span class="stat-label">Danno Tot.</span><span class="stat-value">${formatNumber(totalDamage)}</span></div>
-    <div class="stat"><span class="stat-label">Bounty</span><span class="stat-value">${formatNumber(totalBounty, true)}</span></div>
-    <div class="stat"><span class="stat-label">Terreno medio</span><span class="stat-value">${avgTerrain}</span></div>`;
+    <div class="stat"><span class="stat-label">Bounty Tot.</span><span class="stat-value">${formatNumber(totalBounty, true)}</span></div>
+    <div class="stat"><span class="stat-label">Terreno Medio</span><span class="stat-value">${avgTerrain}</span></div>
+    ${topMu ? `<div class="stat"><span class="stat-label">🏆 Top Danno Sett.</span><span class="stat-value" style="font-size:12px;color:var(--success)">${topMu.name}</span></div>` : ''}
+    ${topEffMu ? `<div class="stat"><span class="stat-label">⚡ Top Efficienza</span><span class="stat-value" style="font-size:12px;color:var(--accent2)">${topEffMu.name}</span></div>` : ''}`;
+
+  // Performance percentile: top 33% = green, mid = amber, bottom = red
+  const maxWeekly = Math.max(...sortedData.map(m => m.weeklyDamage));
+  const p66 = maxWeekly * 0.66, p33 = maxWeekly * 0.33;
+  function perfDot(val) {
+    if (val >= p66) return '<span class="perf-dot perf-top"></span>';
+    if (val >= p33) return '<span class="perf-dot perf-mid"></span>';
+    return '<span class="perf-dot perf-low"></span>';
+  }
 
   tbody.innerHTML = sortedData
     .map(
-      mu => `
+      (mu, i) => `
     <tr>
-      <td><a href="${APP_BASE}/mu/${mu.id}" target="_blank">${mu.name}</a></td>
+      <td style="color:var(--muted);font-size:11px;">${i + 1}</td>
+      <td>${perfDot(mu.weeklyDamage)}<a href="${APP_BASE}/mu/${mu.id}" target="_blank">${mu.name}</a></td>
       <td>${mu.members}</td>
       <td>${mu.totalLevel}</td>
       <td>${formatNumber(mu.weeklyDamage)}</td>
@@ -882,6 +903,7 @@ function renderCsvAnalysis() {
       <td>${mu.terrain}</td>
       <td>${formatNumber(Math.round(mu.dmgPerMember))}</td>
       <td>${formatNumber(Math.round(mu.weeklyPerMember))}</td>
+      <td style="color:var(--accent2)">${mu.efficiency.toFixed(2)}</td>
       <td>${mu.bountyPerMember.toFixed(2)}</td>
       <td><button class="secondary view-csv-mu-members" data-mu-id="${mu.id}"><i class="fas fa-users"></i></button></td>
     </tr>`
