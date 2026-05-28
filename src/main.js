@@ -58,13 +58,77 @@ function showToast(message, _type = 'info') {
   const container = getToastContainer();
   const toast = document.createElement('div');
   toast.style.cssText =
-    'background:#1a2e1a;border-left:4px solid #00ff88;color:#e0ffe0;padding:12px 20px;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.5);opacity:1;transition:opacity 0.3s;';
+    `background:#0e1117;border-left:3px solid ${_type==='error'?'#f87171':_type==='success'?'#3ecf8e':'#f5a623'};color:#e2e4ec;padding:11px 18px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.6);opacity:1;transition:opacity 0.3s;font-family:'DM Mono',monospace;font-size:12px;backdrop-filter:blur(10px);`;
   toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+
+// ==================== LOADER / PROGRESS ====================
+// ==================== PROGRESS PANEL ====================
+const _css = document.createElement('style');
+_css.textContent = `
+  @keyframes _spin{to{transform:rotate(360deg)}}
+  #_progPanel{position:fixed;bottom:24px;right:24px;width:300px;background:#0c0e14;border:1px solid rgba(245,166,35,0.35);border-radius:14px;padding:18px;z-index:20001;box-shadow:0 8px 40px rgba(0,0,0,0.8);font-family:'DM Mono',monospace;font-size:12px;color:#e2e4ec;transition:opacity 0.4s;opacity:0;pointer-events:none;}
+  #_progPanel.visible{opacity:1;}
+  ._prow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+  ._prow:last-child{border-bottom:none;}
+  ._picon{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  ._spin{width:14px;height:14px;border:2px solid rgba(245,166,35,0.2);border-top-color:#f5a623;border-radius:50%;animation:_spin 0.7s linear infinite;}
+  ._plabel{flex:1;color:#8891aa;}
+  ._plabel.active{color:#e2e4ec;}
+  ._pval{color:#f5a623;font-weight:600;min-width:60px;text-align:right;}
+  ._pbar-wrap{margin-top:12px;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+  ._pbar{height:100%;width:0%;background:linear-gradient(90deg,#f5a623,#ffd166);border-radius:2px;transition:width 0.25s;box-shadow:0 0 6px #f5a62366;}
+`;
+document.head.appendChild(_css);
+
+const _panel = document.createElement('div');
+_panel.id = '_progPanel';
+_panel.innerHTML = `
+  <div style="font-family:'Oxanium',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#f5a623;margin-bottom:10px;">⟳ Caricamento dati</div>
+  <div id="_pr0" class="_prow"><span class="_picon">○</span><span class="_plabel">Download CSV</span><span class="_pval" id="_pv0">—</span></div>
+  <div id="_pr1" class="_prow"><span class="_picon">○</span><span class="_plabel">Fetch MU</span><span class="_pval" id="_pv1">—</span></div>
+  <div id="_pr2" class="_prow"><span class="_picon">○</span><span class="_plabel">Profili giocatori</span><span class="_pval" id="_pv2">—</span></div>
+  <div class="_pbar-wrap"><div class="_pbar" id="_pbar"></div></div>
+`;
+document.body.appendChild(_panel);
+
+let _totalPct = 0;
+function _setStep(idx, state, val) {
+  // state: 'pending'|'active'|'done'|'error'
+  const row = document.getElementById('_pr'+idx);
+  const icon = row.querySelector('._picon');
+  const label = row.querySelector('._plabel');
+  const valEl = document.getElementById('_pv'+idx);
+  if (state==='active') { icon.innerHTML='<div class="_spin"></div>'; label.classList.add('active'); }
+  else if (state==='done') { icon.textContent='✓'; icon.style.color='#3ecf8e'; label.style.color='#3ecf8e'; }
+  else if (state==='error') { icon.textContent='✗'; icon.style.color='#f87171'; }
+  if (val!=null) valEl.textContent = val;
+}
+function _setPct(pct) {
+  _totalPct = pct;
+  document.getElementById('_pbar').style.width = Math.min(pct,100)+'%';
+}
+
+function showLoader(msg) {
+  _panel.classList.add('visible');
+  // reset
+  [0,1,2].forEach(i=>{ _setStep(i,'pending',null); document.getElementById('_pv'+i).textContent='—'; document.querySelectorAll('._plabel')[i]&&document.querySelectorAll('#_pr'+i+' ._plabel')[0]?.classList.remove('active'); });
+  _setPct(5);
+}
+function updateLoader(msg, pct, stepData) {
+  if (pct!=null) _setPct(pct);
+  // stepData: {step:0|1|2, state, val}
+  if (stepData) _setStep(stepData.step, stepData.state, stepData.val);
+}
+function hideLoader() {
+  _setPct(100);
+  setTimeout(()=>{ _panel.classList.remove('visible'); }, 1800);
 }
 
 // ==================== UTILITY ====================
@@ -173,17 +237,14 @@ async function refreshAllMuData() {
   const ids = Array.from(allMuIds);
   if (ids.length === 0) return;
 
-  showToast(`🔄 Aggiornamento ${ids.length} MU...`, 'info');
-  // Promise.allSettled + il package batcha automaticamente le chiamate nello stesso tick
-  const results = await Promise.allSettled(ids.map(id => fetchMuById(id)));
+  showLoader(); _setStep(1,'active',`0 / ${ids.length}`);
+  let done = 0;
+  const results = await Promise.allSettled(ids.map(id => fetchMuById(id).then(r => { done++; _setStep(1,'active',`${done} / ${ids.length}`); _setPct(10+done/ids.length*85); return r; })));
   results.forEach((result, i) => {
-    if (result.status === 'fulfilled' && result.value) {
-      muDataCache.set(ids[i], result.value);
-    } else {
-      muDataCache.delete(ids[i]);
-    }
+    if (result.status === 'fulfilled' && result.value) { muDataCache.set(ids[i], result.value); }
+    else { muDataCache.delete(ids[i]); }
   });
-  showToast('✅ MU aggiornate', 'success');
+  _setStep(1,'done',`${ids.length} ok`); hideLoader();
 }
 
 async function loadMultipleMus(muIds) {
@@ -196,9 +257,10 @@ async function preloadUserNames(userIds, showProgress = false) {
   const uniqueIds = [...new Set(userIds)];
   const toLoad = uniqueIds.filter(id => !userCache.has(id));
   if (toLoad.length === 0) return;
-  if (showProgress) showToast(`🔄 Caricamento ${toLoad.length} profili...`, 'info');
-  await Promise.allSettled(toLoad.map(id => fetchUserById(id)));
-  if (showProgress) showToast(`✅ ${toLoad.length} profili caricati`, 'success');
+  if (showProgress) _setStep(2,'active',`0 / ${toLoad.length}`);
+  let _p = 0;
+  await Promise.allSettled(toLoad.map(id => fetchUserById(id).then(r => { _p++; if(showProgress) { _setStep(2,'active',`${_p} / ${toLoad.length}`); _setPct(80 + _p/toLoad.length*18); }; return r; })));
+  if (showProgress) { _setStep(2,'done',toLoad.length+' ok'); }
 }
 
 // ==================== STORAGE ====================
@@ -787,10 +849,11 @@ function sortCsvData(data, column, direction) {
 
 // ==================== CSV: LOAD ====================
 async function loadCsvFromUrl(url) {
-  showToast('📡 Scaricamento CSV in corso...', 'info');
+  showLoader(); _setStep(0,'active','...');
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('Impossibile scaricare il CSV');
+    _setStep(0,'active','parsing...'); _setPct(20);
     const text = await resp.text();
     const cleanText = text.replace(/["']/g, ' ');
     const matches = cleanText.match(/[a-f0-9]{24}/gi);
@@ -802,7 +865,7 @@ async function loadCsvFromUrl(url) {
       muIds = [...new Set(tokens.map(t => t.toLowerCase()))];
     }
     if (!muIds.length) throw new Error('Nessun ID MU valido trovato nel CSV');
-    showToast(`🔍 Trovati ${muIds.length} ID MU. Avvio richieste API...`, 'info');
+    _setStep(0,'done',`${muIds.length} ID`); _setStep(1,'active','0 / '+muIds.length); _setPct(30);
     await loadCsvMuData(muIds);
     renderCsvAnalysis();
     damageContainer.style.display = 'block';
@@ -818,10 +881,13 @@ async function loadCsvFromUrl(url) {
 async function loadCsvMuData(muIds) {
   csvMuData = [];
   const uniqueIds = [...new Set(muIds)];
-  const muData = await loadMultipleMus(uniqueIds);
+  let _cm = 0;
+  _setStep(1,'active',`0 / ${uniqueIds.length}`);
+  const muData = await Promise.allSettled(uniqueIds.map(id => fetchMuById(id).then(r => { _cm++; _setStep(1,'active',`${_cm} / ${uniqueIds.length}`); _setPct(30 + _cm/uniqueIds.length*50); return r; }))).then(rs => rs.map(r => r.status==='fulfilled'?r.value:null));
   const allUserIds = new Set();
   muData.forEach(mu => { if (mu?.members) mu.members.forEach(uid => allUserIds.add(uid)); });
-  if (allUserIds.size) await preloadUserNames(Array.from(allUserIds));
+  if (allUserIds.size) { _setStep(1,'done',`${uniqueIds.length} ok`); _setStep(2,'active',`0 / ${allUserIds.size}`); _setPct(80); await preloadUserNames(Array.from(allUserIds), true); } else { _setStep(1,'done',`${uniqueIds.length} ok`); }
+  _setStep(2,'done','ok'); hideLoader();
   csvMuData = muData
     .map(mu => {
       if (!mu) return null;
