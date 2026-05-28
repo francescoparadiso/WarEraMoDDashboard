@@ -291,7 +291,7 @@
     (function(){
       const c=document.getElementById('bg-canvas'),ctx=c.getContext('2d');
       let W,H,pts;
-      const N=160,CONN=160,SPEED=0.5;
+      const N=320,CONN=250,SPEED=1.5;
       function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
       function mkPt(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPEED,vy:(Math.random()-.5)*SPEED,r:Math.random()*1.5+.5,amber:Math.random()>.2};}
       function init(){resize();pts=Array.from({length:N},mkPt);}
