@@ -69,66 +69,71 @@ function showToast(message, _type = 'info') {
 
 
 // ==================== LOADER / PROGRESS ====================
-// ==================== PROGRESS PANEL ====================
 const _css = document.createElement('style');
 _css.textContent = `
   @keyframes _spin{to{transform:rotate(360deg)}}
-  #_progPanel{position:fixed;bottom:24px;right:24px;width:300px;background:#0c0e14;border:1px solid rgba(245,166,35,0.35);border-radius:14px;padding:18px;z-index:20001;box-shadow:0 8px 40px rgba(0,0,0,0.8);font-family:'DM Mono',monospace;font-size:12px;color:#e2e4ec;transition:opacity 0.4s;opacity:0;pointer-events:none;}
-  #_progPanel.visible{opacity:1;}
-  ._prow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+  #_topbar{position:fixed;top:0;left:0;right:0;height:3px;width:0%;background:linear-gradient(90deg,#f5a623,#ffd166);z-index:2147483646;pointer-events:none;box-shadow:0 0 10px #f5a62399;transition:width 0.35s ease;}
+  #_progPanel{position:fixed;bottom:24px;right:24px;width:300px;background:#0c0e14;border:1px solid rgba(245,166,35,0.4);border-radius:14px;padding:18px;z-index:2147483647;box-shadow:0 8px 40px rgba(0,0,0,0.85);transform:translateZ(0);will-change:opacity;font-family:'DM Mono',monospace;font-size:12px;color:#e2e4ec;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  #_progPanel.vis{opacity:1;}
+  ._prow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
   ._prow:last-child{border-bottom:none;}
-  ._picon{width:16px;height:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
-  ._spin{width:14px;height:14px;border:2px solid rgba(245,166,35,0.2);border-top-color:#f5a623;border-radius:50%;animation:_spin 0.7s linear infinite;}
-  ._plabel{flex:1;color:#8891aa;}
-  ._plabel.active{color:#e2e4ec;}
-  ._pval{color:#f5a623;font-weight:600;min-width:60px;text-align:right;}
-  ._pbar-wrap{margin-top:12px;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
-  ._pbar{height:100%;width:0%;background:linear-gradient(90deg,#f5a623,#ffd166);border-radius:2px;transition:width 0.25s;box-shadow:0 0 6px #f5a62366;}
+  ._picon{width:18px;flex-shrink:0;text-align:center;font-size:13px;line-height:1;}
+  ._spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(245,166,35,0.15);border-top-color:#f5a623;border-radius:50%;animation:_spin 0.7s linear infinite;vertical-align:middle;}
+  ._plabel{flex:1;color:#8891aa;transition:color 0.2s;}
+  ._pval{color:#f5a623;font-weight:600;min-width:72px;text-align:right;transition:color 0.2s;}
 `;
 document.head.appendChild(_css);
 
-const _panel = document.createElement('div');
-_panel.id = '_progPanel';
+const _topbar = document.createElement('div'); _topbar.id='_topbar';
+const _panel  = document.createElement('div'); _panel.id='_progPanel';
 _panel.innerHTML = `
-  <div style="font-family:'Oxanium',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#f5a623;margin-bottom:10px;">⟳ Caricamento dati</div>
-  <div id="_pr0" class="_prow"><span class="_picon">○</span><span class="_plabel">Download CSV</span><span class="_pval" id="_pv0">—</span></div>
-  <div id="_pr1" class="_prow"><span class="_picon">○</span><span class="_plabel">Fetch MU</span><span class="_pval" id="_pv1">—</span></div>
-  <div id="_pr2" class="_prow"><span class="_picon">○</span><span class="_plabel">Profili giocatori</span><span class="_pval" id="_pv2">—</span></div>
-  <div class="_pbar-wrap"><div class="_pbar" id="_pbar"></div></div>
-`;
+  <div style="font-family:'Oxanium',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#f5a623;margin-bottom:12px;display:flex;align-items:center;gap:8px;"><div class="_spin"></div>Caricamento dati</div>
+  <div id="_pr0" class="_prow"><span class="_picon">–</span><span class="_plabel">Download CSV</span><span class="_pval" id="_pv0">—</span></div>
+  <div id="_pr1" class="_prow"><span class="_picon">–</span><span class="_plabel">Fetch MU</span><span class="_pval" id="_pv1">—</span></div>
+  <div id="_pr2" class="_prow"><span class="_picon">–</span><span class="_plabel">Profili giocatori</span><span class="_pval" id="_pv2">—</span></div>`;
+document.body.appendChild(_topbar);
 document.body.appendChild(_panel);
 
-let _totalPct = 0;
-function _setStep(idx, state, val) {
-  // state: 'pending'|'active'|'done'|'error'
-  const row = document.getElementById('_pr'+idx);
-  const icon = row.querySelector('._picon');
-  const label = row.querySelector('._plabel');
-  const valEl = document.getElementById('_pv'+idx);
-  if (state==='active') { icon.innerHTML='<div class="_spin"></div>'; label.classList.add('active'); }
-  else if (state==='done') { icon.textContent='✓'; icon.style.color='#3ecf8e'; label.style.color='#3ecf8e'; }
-  else if (state==='error') { icon.textContent='✗'; icon.style.color='#f87171'; }
-  if (val!=null) valEl.textContent = val;
-}
-function _setPct(pct) {
-  _totalPct = pct;
-  document.getElementById('_pbar').style.width = Math.min(pct,100)+'%';
-}
+const _stateOf = [null, null, null]; // track done state per step
 
-function showLoader(msg) {
-  _panel.classList.add('visible');
-  // reset
-  [0,1,2].forEach(i=>{ _setStep(i,'pending',null); document.getElementById('_pv'+i).textContent='—'; document.querySelectorAll('._plabel')[i]&&document.querySelectorAll('#_pr'+i+' ._plabel')[0]?.classList.remove('active'); });
-  _setPct(5);
+function _setStep(idx, state, val) {
+  const row  = document.getElementById('_pr'+idx);
+  const icon = row.querySelector('._picon');
+  const lbl  = row.querySelector('._plabel');
+  const vEl  = document.getElementById('_pv'+idx);
+  _stateOf[idx] = state;
+  if (state==='active') { icon.innerHTML='<div class="_spin"></div>'; lbl.style.color='#e2e4ec'; vEl.style.color='#f5a623'; }
+  else if (state==='done')  { icon.innerHTML='✓'; icon.style.color='#3ecf8e'; lbl.style.color='#3ecf8e'; vEl.style.color='#3ecf8e'; }
+  else if (state==='skip')  { icon.innerHTML='–'; icon.style.color='#525870'; lbl.style.color='#525870'; vEl.style.color='#525870'; }
+  else if (state==='error') { icon.innerHTML='✗'; icon.style.color='#f87171'; lbl.style.color='#f87171'; vEl.style.color='#f87171'; }
+  if (val != null) vEl.textContent = val;
 }
-function updateLoader(msg, pct, stepData) {
-  if (pct!=null) _setPct(pct);
-  // stepData: {step:0|1|2, state, val}
-  if (stepData) _setStep(stepData.step, stepData.state, stepData.val);
+function _setPct(pct) { _topbar.style.width = Math.min(pct, 98)+'%'; }
+
+function showLoader(steps = [0,1,2]) {
+  // reset all rows
+  [0,1,2].forEach(i => {
+    _stateOf[i] = null;
+    const r = document.getElementById('_pr'+i);
+    r.querySelector('._picon').innerHTML='–'; r.querySelector('._picon').style.color='';
+    r.querySelector('._plabel').style.color='#8891aa';
+    const v = document.getElementById('_pv'+i); v.textContent='—'; v.style.color='#f5a623';
+  });
+  _topbar.style.transition='none'; _topbar.style.width='0%';
+  requestAnimationFrame(()=>{ _topbar.style.transition='width 0.35s ease'; _setPct(4); });
+  _panel.classList.add('vis');
 }
+function updateLoader(pct) { if (pct!=null) _setPct(pct); }
 function hideLoader() {
-  _setPct(100);
-  setTimeout(()=>{ _panel.classList.remove('visible'); }, 1800);
+  const tryClose = () => {
+    if (_inFlight > 0) { setTimeout(tryClose, 250); return; }
+    _setPct(100);
+    setTimeout(()=>{
+      _panel.classList.remove('vis');
+      setTimeout(()=>{ _topbar.style.transition='none'; _topbar.style.width='0%'; }, 500);
+    }, 2000);
+  };
+  tryClose();
 }
 
 // ==================== UTILITY ====================
@@ -202,6 +207,7 @@ async function fetchMuById(muId) {
 }
 
 // ==================== API: UTENTE ====================
+let _inFlight = 0;
 async function fetchUserById(userId) {
   if (userAliasMap.has(userId)) {
     return { name: userAliasMap.get(userId), id: userId, avatarUrl: null, level: 0 };
@@ -209,6 +215,7 @@ async function fetchUserById(userId) {
   if (userCache.has(userId)) return userCache.get(userId);
 
   try {
+    _inFlight++;
     const url = `${API_BASE}/user?id=${encodeURIComponent(userId)}`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -221,8 +228,10 @@ async function fetchUserById(userId) {
       level: data.leveling?.level || 0,
     };
     userCache.set(userId, user);
+    _inFlight--;
     return user;
   } catch (err) {
+    _inFlight--;
     console.warn(`Utente ${userId} non caricato`, err);
     const fallback = { name: `ID: ${userId.slice(-6)}`, id: userId, avatarUrl: null, level: 0 };
     userCache.set(userId, fallback);
@@ -231,20 +240,20 @@ async function fetchUserById(userId) {
 }
 
 // ==================== API: BATCH HELPERS ====================
-async function refreshAllMuData() {
+async function refreshAllMuData(explicit=false) {
   const allMuIds = new Set();
   battalions.forEach(b => b.muIds.forEach(id => allMuIds.add(id)));
   const ids = Array.from(allMuIds);
   if (ids.length === 0) return;
 
-  showLoader(); _setStep(1,'active',`0 / ${ids.length}`);
-  let done = 0;
-  const results = await Promise.allSettled(ids.map(id => fetchMuById(id).then(r => { done++; _setStep(1,'active',`${done} / ${ids.length}`); _setPct(10+done/ids.length*85); return r; })));
+  const _isExplicit = explicit;
+  if(_isExplicit){ _setStep(0,'skip','—'); _setStep(1,'active',`0 / ${ids.length}`); _setStep(2,'skip','—'); }  let done = 0;
+  const results = await Promise.allSettled(ids.map(id => fetchMuById(id).then(r => { done++; _setStep(1,'active',`${done} / ${ids.length}`); if(_isExplicit) _setPct(10+done/ids.length*85); return r; })));
   results.forEach((result, i) => {
     if (result.status === 'fulfilled' && result.value) { muDataCache.set(ids[i], result.value); }
     else { muDataCache.delete(ids[i]); }
   });
-  _setStep(1,'done',`${ids.length} ok`); hideLoader();
+  if(_isExplicit){_setStep(1,'done',`${ids.length} ok`); hideLoader();}
 }
 
 async function loadMultipleMus(muIds) {
@@ -874,6 +883,8 @@ async function loadCsvFromUrl(url) {
     weeklyPerMemberContainer.style.display = 'none';
     setActiveChartButton(showDamageBtn);
   } catch (e) {
+    _setStep(0,'error', 'errore'); _setStep(1,'skip','—'); _setStep(2,'skip','—');
+    hideLoader();
     alert('Errore: ' + e.message);
   }
 }
@@ -999,8 +1010,9 @@ async function init() {
   renderBattalionList();
   renderBalancePanel();
 
-  await refreshAllMuData();
-
+  showLoader();
+  _setStep(0,'skip','—');
+  await refreshAllMuData(true);
   const allUserIds = new Set();
   battalions.forEach(b => {
     b.muIds.forEach(muId => { const mu = muDataCache.get(muId); if (mu?.members) mu.members.forEach(uid => allUserIds.add(uid)); });
@@ -1013,13 +1025,19 @@ async function init() {
 
   if (selectedBattalionId) await renderBattalionDetail(selectedBattalionId);
   else if (battalions.length > 0) await selectBattalion(battalions[0].id);
+  await new Promise(r => setTimeout(r, 400));
+  hideLoader();
+  // re-render once all data is confirmed loaded
+  renderBattalionList();
+  if (selectedBattalionId) renderBattalionDetail(selectedBattalionId);
 
   // ---- Event listeners ----
   newBtn.addEventListener('click', createNewBattalion);
   document.getElementById('autoBalanceBtn').addEventListener('click', autoBalanceBattalions);
 
   refreshAllBtn.addEventListener('click', async () => {
-    await refreshAllMuData();
+    showLoader();
+    await refreshAllMuData(true);
     const userIds = new Set();
     battalions.forEach(b => {
       b.muIds.forEach(muId => { const mu = muDataCache.get(muId); if (mu?.members) mu.members.forEach(uid => userIds.add(uid)); });
@@ -1029,6 +1047,8 @@ async function init() {
     renderBattalionList();
     renderBalancePanel();
     if (selectedBattalionId) await renderBattalionDetail(selectedBattalionId);
+    await new Promise(r => setTimeout(r, 400));
+    hideLoader();
   });
 
   // Bottoni grafici
